@@ -1,15 +1,13 @@
 package com.example.member.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import com.example.member.dto.MemberDTO;
 import com.example.member.service.MemberService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,13 +24,18 @@ public class MemberController {
         return "save";
     }
 
-    @PostMapping("/member/save")    // name값을 requestparam에 담아온다
-    public String save(@ModelAttribute MemberDTO memberDTO) {
+    @PostMapping("/member/save")
+    @ResponseBody // JSON 형태로 응답을 반환하게 설정
+    public ResponseEntity<?> save(@ModelAttribute MemberDTO memberDTO) {
         System.out.println("MemberController.save");
         System.out.println("memberDTO = " + memberDTO);
-        memberService.save(memberDTO);
 
-        return "login";
+        boolean success = memberService.save(memberDTO);
+        if (success) {
+            return ResponseEntity.ok("true");
+        } else {
+            return ResponseEntity.ok("false");
+        }
     }
 
     @GetMapping("/member/login")

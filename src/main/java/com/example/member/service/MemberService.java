@@ -17,11 +17,14 @@ public class MemberService {
 
     private final MemberRepository memberRepository; // 먼저 jpa, mysql dependency 추가
 
-    public void save(MemberDTO memberDTO) {
-        // repsitory의 save 메서드 호출
-        MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
-        memberRepository.save(memberEntity);
-        //Repository의 save메서드 호출 (조건. entity객체를 넘겨줘야 함)
+    public boolean save(MemberDTO memberDTO) {
+        try {
+            MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
+            memberRepository.save(memberEntity);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
 
     }
     public MemberDTO login(MemberDTO memberDTO){ //entity객체는 service에서만
