@@ -18,11 +18,11 @@ public class WeatherController {
     @GetMapping("/weather")
     public String getWeather() {
         try {
-            weatherService.getWeatherInfo();
-            return "Weather API response logged successfully!";
+            // WeatherService에서 날씨 정보를 문자열로 받아와 클라이언트에 반환
+            return weatherService.getWeatherInfo();
         } catch (IOException e) {
             e.printStackTrace();
-            return "Error occurred while logging weather API response!";
+            return "Error occurred while fetching weather information!";
         }
     }
 }
