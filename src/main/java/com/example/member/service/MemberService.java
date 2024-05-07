@@ -1,74 +1,52 @@
 package com.example.member.service;
 
+
 import com.example.member.dto.MemberDTO;
 import com.example.member.entity.MemberEntity;
+import com.example.member.mapper.MemberMapper;
 import com.example.member.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
+import com.example.member.response.ResponseData;
+import com.example.member.response.StatusCode;
+import com.example.member.response.Success;
+import lombok.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-@Service //스프링이 관리해주는 객체 == 스프링 빈
-@RequiredArgsConstructor //controller와 같이. final 멤버변수 생성자 만드는 역할
+@Service
+@RequiredArgsConstructor
 public class MemberService {
 
+    private final MemberRepository memberRepository;
 
-    private final MemberRepository memberRepository; // 먼저 jpa, mysql dependency 추가
-
-    public boolean save(MemberDTO memberDTO) {
+    public ResponseData<MemberEntity> save(MemberDTO memberDTO) {
         try {
-            MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
-            memberRepository.save(memberEntity);
-            return true;
+            MemberEntity memberEntity = MemberMapper.INSTANCE.toEntity(memberDTO);
+            memberEntity = memberRepository.save(memberEntity);
+            return ResponseData.res(StatusCode.OK, Success.TRUE);
         } catch (Exception e) {
-            return false;
+            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
         }
-
     }
-    public MemberDTO login(MemberDTO memberDTO){ //entity객체는 service에서만
+
+    public ResponseData<MemberDTO> login(MemberDTO memberDTO) {
         Optional<MemberEntity> byMemberEmail = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
-        if(byMemberEmail.isPresent()){
-            // 조회 결과가 있다
-            MemberEntity memberEntity = byMemberEmail.get(); // Optional에서 꺼냄
-            if(memberEntity.getMemberPassword().equals(memberDTO.getMemberPassword())) {
-                //비밀번호 일치
-                //entity -> dto 변환 후 리턴
-                MemberDTO dto = MemberDTO.toMemberDTO(memberEntity);
-                return dto;
-            } else {
-                //비밀번호 불일치
-                return null;
+        if (byMemberEmail.isPresent()) {
+            MemberEntity memberEntity = byMemberEmail.get();
+            if (memberEntity.getMemberPassword().equals(memberDTO.getMemberPassword())) {//성공했을때
+                memberDTO = MemberMapper.INSTANCE.toDTO(memberEntity);
+                return ResponseData.res(StatusCode.OK, Success.TRUE, memberDTO);
+            } else {//비밀번호 틀렸을때
+                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
             }
-        } else {
-            // 조회 결과가 없다
-            return null;
+        } else {//아예아이디도없을때
+            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
         }
     }
-    public List<MemberDTO> findAll() {
-        List<MemberEntity> memberEntityList = memberRepository.findAll();
-        //Controller로 dto로 변환해서 줘야 함
-        List<MemberDTO> memberDTOList = new ArrayList<>();
-        for (MemberEntity memberEntity : memberEntityList){
-            memberDTOList.add(MemberDTO.toMemberDTO(memberEntity));
 
-        }
-        return memberDTOList;
-
+    public boolean verify(MemberDTO memberDTO) {
+        Optional<MemberEntity> byMemberEmail = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
+        return byMemberEmail.isEmpty();
     }
-    public MemberDTO findById(Long id) {
-        // 하나 조회할때 optional로 감싸줌
-        Optional<MemberEntity> optionalMemberEntity = memberRepository.findById(id);
-        if (optionalMemberEntity.isPresent()){
-            return MemberDTO.toMemberDTO(optionalMemberEntity.get()); // optional을 벗겨내서 entity -> dto 변환
-        }else {
-            return null;
-        }
 
-
-    }
-    public void deleteByid(Long id) {
-        memberRepository.deleteById(id);
-    }
 }
