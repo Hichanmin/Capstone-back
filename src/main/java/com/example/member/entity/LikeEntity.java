@@ -19,7 +19,4 @@ public class LikeEntity {
 
     @Column
     private String likeTodoId;
-
-    @Column
-    private boolean likeCheck;
 }

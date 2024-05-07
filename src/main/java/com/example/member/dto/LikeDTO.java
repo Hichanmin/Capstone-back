@@ -12,5 +12,4 @@ public class LikeDTO {
     private Long id;
     private String likeEmail;
     private String likeTodoId;
-    private boolean likeCheck;
 }
