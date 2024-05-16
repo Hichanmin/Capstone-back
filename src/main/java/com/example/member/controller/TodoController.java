@@ -32,6 +32,15 @@ public class TodoController {
         return todoService.showlist(todoDTO);
     }
 
+    @PostMapping(
+            path="/todo/search",
+            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    public ResponseData<List<TodoDTO>> search(@RequestBody TodoDTO TodoDTO) {
+        return todoService.search(TodoDTO);
+    }
+
+
+
     @PostMapping("/todo/delete/{todoDate}") // URL 경로에서 todoDate를 추출하여 삭제 요청 처리
     public ResponseData<Void> delete(@PathVariable String todoDate, @RequestBody TodoDTO todoDTO) {
         // 받은 값을 로그에 출력합니다.
