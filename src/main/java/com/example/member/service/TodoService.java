@@ -77,7 +77,7 @@ public class TodoService {
         String keyword = todoDTO.getTodoTitle(); // 키워드 추출
         Optional<List<TodoEntity>> todoEntities = todoRepository.findByTodoTitleContaining(keyword);
 
-        if (todoEntities.isPresent()) {
+        if (todoEntities.isPresent() && !todoEntities.get().isEmpty()) {
             List<TodoDTO> todoDTOList = todoEntities.get().stream()
                     .filter(TodoEntity::isTodoCheck) // todoCheck가 true인 엔티티만 필터링
                     .map(TodoMapper.INSTANCE::toDTO)
@@ -87,6 +87,7 @@ public class TodoService {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
         }
     }
+
 
 
 
