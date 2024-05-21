@@ -61,6 +61,7 @@ public class MemberService {
         } else {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
         }
+        //커밋
     }
 
 }
