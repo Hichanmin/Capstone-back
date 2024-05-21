@@ -28,14 +28,14 @@ public class MemberController {
 
     @PostMapping(
             path = "/save",
-            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+            consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseData<MemberEntity> save(@RequestBody MemberDTO memberDTO) {
         return memberService.save(memberDTO);
     }
 
     @PostMapping(
             path = "/login",
-            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+            consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseData<MemberDTO> login(@RequestBody MemberDTO memberDTO, HttpServletRequest request) {
         ResponseData<MemberDTO> responseData = memberService.login(memberDTO);
         if (responseData.getStatusCode() == StatusCode.OK) {
@@ -53,8 +53,17 @@ public class MemberController {
         return ResponseEntity.ok().body(response);
     }
 
+    @PutMapping(path = "/update")
+    public ResponseEntity<?> updateMember(@RequestBody MemberDTO memberDTO) {
+        try {
+            MemberDTO updatedMember = memberService.updateMemberCredentials(memberDTO).getData();
+            return ResponseEntity.ok().body(new ResponseData<MemberDTO>(StatusCode.OK, "Member updated successfully", updatedMember));
+        } catch (Exception e) {
+            logger.error("Error updating member credentials: ", e);
+            return ResponseEntity.badRequest().body(new ResponseData<MemberDTO>(StatusCode.BAD_REQUEST, "Failed to update member credentials"));
+        }
+    }
+
+
+
 }
-
-
-
-

@@ -49,4 +49,24 @@ public class MemberService {
         return byMemberEmail.isEmpty();
     }
 
+    public ResponseData<MemberDTO> updateMemberCredentials(MemberDTO memberDTO) {
+        Optional<MemberEntity> byMemberEmail = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
+        if (byMemberEmail.isPresent()) {
+            MemberEntity memberEntity = byMemberEmail.get();
+            memberEntity.setMemberName(memberDTO.getMemberName());
+            memberEntity.setMemberPassword(memberDTO.getMemberPassword());
+            memberEntity = memberRepository.save(memberEntity);
+
+            return ResponseData.res(StatusCode.OK, Success.TRUE, MemberMapper.INSTANCE.toDTO(memberEntity));
+        } else {
+            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
+        }
+    }
+
 }
+
+
+
+
+
+
