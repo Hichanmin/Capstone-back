@@ -10,7 +10,6 @@ public class ResponseData<T> {
     private int statusCode;
     private String success;
     private T data;
-    private int a;
     public ResponseData(final int statusCode, final String success) {
         this.statusCode = statusCode;
         this.success = success;
