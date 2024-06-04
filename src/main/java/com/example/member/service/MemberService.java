@@ -10,6 +10,7 @@ import com.example.member.response.StatusCode;
 import com.example.member.response.Success;
 import lombok.*;
 import org.springframework.stereotype.Service;
+import org.mapstruct.Mapper;
 
 import java.util.Optional;
 
@@ -18,10 +19,12 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final MemberMapper memberMapper; // MapStruct 매퍼 인터페이스
+
 
     public ResponseData<MemberEntity> save(MemberDTO memberDTO) {
         try {
-            MemberEntity memberEntity = MemberMapper.INSTANCE.toEntity(memberDTO);
+            MemberEntity memberEntity = memberMapper.toEntity(memberDTO);
             memberEntity = memberRepository.save(memberEntity);
             return ResponseData.res(StatusCode.OK, Success.TRUE);
         } catch (Exception e) {
@@ -34,7 +37,7 @@ public class MemberService {
         if (byMemberEmail.isPresent()) {
             MemberEntity memberEntity = byMemberEmail.get();
             if (memberEntity.getMemberPassword().equals(memberDTO.getMemberPassword())) {//성공했을때
-                memberDTO = MemberMapper.INSTANCE.toDTO(memberEntity);
+                memberDTO = memberMapper.toDTO(memberEntity);
                 return ResponseData.res(StatusCode.OK, Success.TRUE, memberDTO);
             } else {//비밀번호 틀렸을때
                 return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
@@ -49,22 +52,34 @@ public class MemberService {
         return byMemberEmail.isEmpty();
     }
 
+
+
     public ResponseData<MemberDTO> updateMemberCredentials(MemberDTO memberDTO) {
-        Optional<MemberEntity> byMemberEmail = memberRepository.findByMemberEmail(memberDTO.getMemberEmail());
-        if (byMemberEmail.isPresent()) {
-            MemberEntity memberEntity = byMemberEmail.get();
+        Optional<MemberEntity> memberEntityOptional = memberRepository.findById(memberDTO.getId());
+        if (memberEntityOptional.isPresent()) {
+            MemberEntity memberEntity = memberEntityOptional.get();
             memberEntity.setMemberName(memberDTO.getMemberName());
             memberEntity.setMemberPassword(memberDTO.getMemberPassword());
-            memberEntity = memberRepository.save(memberEntity);
-
-            return ResponseData.res(StatusCode.OK, Success.TRUE, MemberMapper.INSTANCE.toDTO(memberEntity));
+            memberRepository.save(memberEntity);
+            memberDTO = MemberMapper.INSTANCE.toDTO(memberEntity);
+            return ResponseData.res(StatusCode.OK, Success.TRUE, memberDTO);
         } else {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
+            return ResponseData.res(StatusCode.NOT_FOUND, null);
         }
-        //tlqkf
     }
-
+    public ResponseData<MemberDTO> getMemberById(Long id) {
+        Optional<MemberEntity> memberEntityOptional = memberRepository.findById(id);
+        if (memberEntityOptional.isPresent()) {
+            MemberEntity member = memberEntityOptional.get();
+            MemberDTO memberDTO = memberMapper.toDTO(member);
+            return ResponseData.res(StatusCode.OK, "Member fetched successfully", memberDTO);
+        } else {
+            return ResponseData.res(StatusCode.NOT_FOUND, "Member not found");
+        }
+    }
 }
+
+
 
 
 

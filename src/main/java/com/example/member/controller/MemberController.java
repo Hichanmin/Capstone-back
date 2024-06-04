@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,17 +54,37 @@ public class MemberController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PutMapping(path = "/update")
-    public ResponseEntity<?> updateMember(@RequestBody MemberDTO memberDTO) {
+    @GetMapping("/info/{id}")
+    public ResponseEntity<?> getMemberInfo(@PathVariable Long id) {
         try {
-            MemberDTO updatedMember = memberService.updateMemberCredentials(memberDTO).getData();
-            return ResponseEntity.ok().body(new ResponseData<MemberDTO>(StatusCode.OK, "Member updated successfully", updatedMember));
+            ResponseData<MemberDTO> response = memberService.getMemberById(id);
+            if (response.getData() != null) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseData.res(StatusCode.NOT_FOUND, "Member not found"));
+            }
         } catch (Exception e) {
-            logger.error("Error updating member credentials: ", e);
-            return ResponseEntity.badRequest().body(new ResponseData<MemberDTO>(StatusCode.BAD_REQUEST, "Failed to update member credentials"));
+            logger.error("Error fetching member info: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, "Error fetching member info"));
         }
     }
 
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateMember(@PathVariable Long id, @RequestBody MemberDTO memberDTO) {
+        try {
+            memberDTO.setId(id);  // DTO에 ID 설정
+            ResponseData<MemberDTO> response = memberService.updateMemberCredentials(memberDTO);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error updating member credentials: ", e);
+            return ResponseEntity.badRequest().body(ResponseData.res(StatusCode.BAD_REQUEST, "Failed to update member credentials", e.getMessage()));
+        }
+    }
+
 
 }
+
+
+
+
