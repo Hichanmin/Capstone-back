@@ -10,6 +10,7 @@ import com.example.member.repository.MemberRepository;
 import com.example.member.entity.MemberEntity;
 import com.example.member.entity.TodoEntity;
 import com.example.member.mapper.TodoMapper;
+import com.example.member.repository.MemberRepository;
 import com.example.member.repository.TodoRepository;
 import com.example.member.response.ResponseData;
 import com.example.member.response.StatusCode;
@@ -31,6 +32,7 @@ public class TodoService {
 
     private final MemberRepository memberRepository;
     private final TodoRepository todoRepository;
+    private final MemberRepository memberRepository;
 
     public ResponseData<TodoEntity> save(TodoDTO todoDTO) {
         try {
@@ -44,16 +46,23 @@ public class TodoService {
         }
     }
 
-    public ResponseData<List<TodoDTO>> showlist(TodoDTO todoDTO) {
-        Optional<List<TodoEntity>> byTodoEmail = todoRepository.findByTodoEmail(todoDTO.getTodoEmail());
-        if (byTodoEmail.isPresent()) {
-            List<TodoEntity> todoList = byTodoEmail.get();
-            List<TodoDTO> todoDTOList = new ArrayList<>();
-            for (TodoEntity todoEntity : todoList) {
-                TodoDTO mappedTodoDTO = TodoMapper.INSTANCE.toDTO(todoEntity);
-                todoDTOList.add(mappedTodoDTO);
+    public ResponseData<List<TodoDTO>> list(MemberDTO memberDTO) {
+        Optional<MemberEntity> memberEntity = memberRepository.findById(memberDTO.getId());
+        if (memberEntity.isPresent()) {
+            String memberEmail = memberEntity.get().getMemberEmail();
+            Optional<List<TodoEntity>> optionalTodoEntityList = todoRepository.findByTodoEmail(memberEmail);
+
+            if (optionalTodoEntityList.isPresent()) {
+                List<TodoEntity> todoEntityList = optionalTodoEntityList.get();
+                List<TodoDTO> todoDTOList = new ArrayList<>();
+                for(TodoEntity todoEntity : todoEntityList) {
+                    TodoDTO mappedTodoDTO = TodoMapper.INSTANCE.toDTO(todoEntity);
+                    todoDTOList.add(mappedTodoDTO);
+                }
+                return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
+            } else {
+                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
             }
-            return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
         } else {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
         }
