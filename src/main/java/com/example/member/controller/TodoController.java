@@ -1,5 +1,6 @@
 package com.example.member.controller;
 
+import com.example.member.dto.MemberDTO;
 import com.example.member.dto.TodoDTO;
 import com.example.member.entity.TodoEntity;
 import com.example.member.response.ResponseData;
@@ -21,15 +22,14 @@ public class TodoController {
             path = "/todo/create",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
     public ResponseData<TodoEntity> save(@RequestBody TodoDTO todoDTO) {
-        return todoService.save(todoDTO); // TodoService의 인스턴스 메서드 호출
+        return todoService.save(todoDTO);
     }
 
     @PostMapping(
-            path="/todo/mylist",
+            path="/todo/list",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseData<List<TodoDTO>> showmylist(@RequestBody TodoDTO todoDTO) {
-        // 서비스의 메서드를 호출하여 결과 반환
-        return todoService.showlist(todoDTO);
+    public ResponseData<List<TodoDTO>> list(@RequestBody MemberDTO memberDTO) {
+        return todoService.list(memberDTO);
     }
 
     @PostMapping("/todo/delete/{todoDate}") // URL 경로에서 todoDate를 추출하여 삭제 요청 처리
