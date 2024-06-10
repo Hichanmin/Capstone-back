@@ -15,7 +15,7 @@ public class TodoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long todoId;
 
     @Column(nullable = false, length = 30)
     private String todoEmail;
