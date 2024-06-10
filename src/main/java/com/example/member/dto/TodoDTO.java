@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class TodoDTO {
-    private Long id;
+    private Long todoId;
     private String todoTitle;
     private String todoContent;
     private String todoCategory;

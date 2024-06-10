@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface TodoRepository extends JpaRepository<TodoEntity, Long> {
     Optional<List<TodoEntity>> findByTodoEmail(String todoEmail);
-    Optional<TodoEntity> findByTodoDateAndTodoEmail(String todoDate, String todoEmail);
+    Optional<List<TodoEntity>> findByTodoDateAndTodoEmail(String todoDate, String todoEmail);
 }

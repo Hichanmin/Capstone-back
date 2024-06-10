@@ -9,7 +9,7 @@ import lombok.*;
 @ToString
 
 public class LikeDTO {
-    private Long id;
+    private Long likeId;
     private String likeEmail;
     private String likeTodoId;
 }

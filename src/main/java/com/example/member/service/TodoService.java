@@ -1,5 +1,6 @@
 package com.example.member.service;
 
+import java.time.LocalDate;
 import com.example.member.dto.MemberDTO;
 import com.example.member.dto.TodoDTO;
 import com.example.member.entity.MemberEntity;
@@ -12,8 +13,11 @@ import com.example.member.response.ResponseData;
 import com.example.member.response.StatusCode;
 import com.example.member.response.Success;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import java.time.format.DateTimeFormatter;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,26 +44,51 @@ public class TodoService {
     }
 
     public ResponseData<List<TodoDTO>> list(MemberDTO memberDTO) {
-        Optional<MemberEntity> memberEntity = memberRepository.findById(memberDTO.getId());
+        Optional<MemberEntity> memberEntity = memberRepository.findById(memberDTO.getMemberId());
         if (memberEntity.isPresent()) {
             String memberEmail = memberEntity.get().getMemberEmail();
-            Optional<List<TodoEntity>> optionalTodoEntityList = todoRepository.findByTodoEmail(memberEmail);
+            LocalDate today = LocalDate.now();
+            LocalDate tomorrow = today.plusDays(1);
 
-            if (optionalTodoEntityList.isPresent()) {
-                List<TodoEntity> todoEntityList = optionalTodoEntityList.get();
-                List<TodoDTO> todoDTOList = new ArrayList<>();
-                for(TodoEntity todoEntity : todoEntityList) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String todayStr = today.format(formatter);
+            String tomorrowStr = tomorrow.format(formatter);
+
+            Optional<List<TodoEntity>> todayTodoEntity = todoRepository.findByTodoDateAndTodoEmail(todayStr, memberEmail);
+            Optional<List<TodoEntity>> tomorrowTodoEntity = todoRepository.findByTodoDateAndTodoEmail(tomorrowStr, memberEmail);
+
+            List<TodoDTO> todayDTOList = new ArrayList<>();
+            List<TodoDTO> tomorrowDTOList = new ArrayList<>();
+
+            if (todayTodoEntity.isPresent()) {
+                for (TodoEntity todoEntity : todayTodoEntity.get()) {
                     TodoDTO mappedTodoDTO = TodoMapper.INSTANCE.toDTO(todoEntity);
-                    todoDTOList.add(mappedTodoDTO);
+                    todayDTOList.add(mappedTodoDTO);
                 }
-                return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
+            }
+
+            if (tomorrowTodoEntity.isPresent()) {
+                for (TodoEntity todoEntity : tomorrowTodoEntity.get()) {
+                    TodoDTO mappedTodoDTO = TodoMapper.INSTANCE.toDTO(todoEntity);
+                    tomorrowDTOList.add(mappedTodoDTO);
+                }
+            }
+
+            if (todayDTOList.isEmpty() && tomorrowDTOList.isEmpty()) {
+                return ResponseData.listres(StatusCode.OK, Success.TRUE, null, null);
+            } else if (todayDTOList.isEmpty()) {
+                return ResponseData.listres(StatusCode.OK, Success.TRUE, null, tomorrowDTOList);
+            } else if (tomorrowDTOList.isEmpty()) {
+                return ResponseData.listres(StatusCode.OK, Success.TRUE, todayDTOList, null);
             } else {
-                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
+                return ResponseData.listres(StatusCode.OK, Success.TRUE, todayDTOList, tomorrowDTOList);
             }
         } else {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
         }
     }
+
+
 
     public ResponseData<List<TodoDTO>> allList(boolean todoCheck) { // 자료형을 boolean으로 변경
         if (todoCheck) { // boolean 값에 따라 수정
@@ -98,43 +127,43 @@ public class TodoService {
         }
     }
 
-    public ResponseData<Void> delete(String todoDate, String todoEmail) {
-        try {
-            // todoRepository에서 해당하는 todoEntity를 찾아 삭제
-            TodoEntity todoEntity = todoRepository.findByTodoDateAndTodoEmail(todoDate, todoEmail)
-                    .orElseThrow(() -> new IllegalArgumentException("Todo 항목을 찾을 수 없습니다. Date: " + todoDate + ", Email: " + todoEmail));
-            todoRepository.delete(todoEntity);
-            return ResponseData.res(StatusCode.OK, Success.TRUE);
-        } catch (IllegalArgumentException e) {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-        } catch (Exception e) {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-        }
-    }
+//    public ResponseData<Void> delete(String todoDate, String todoEmail) {
+//        try {
+//            // todoRepository에서 해당하는 todoEntity를 찾아 삭제
+//            TodoEntity todoEntity = todoRepository.findByTodoDateAndTodoEmail(todoDate, todoEmail)
+//                    .orElseThrow(() -> new IllegalArgumentException("Todo 항목을 찾을 수 없습니다. Date: " + todoDate + ", Email: " + todoEmail));
+//            todoRepository.delete(todoEntity);
+//            return ResponseData.res(StatusCode.OK, Success.TRUE);
+//        } catch (IllegalArgumentException e) {
+//            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+//        } catch (Exception e) {
+//            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+//        }
+//    }
+//   같은날에 todo가 여러개 있을 수 있음
 
 
 
-
-    public ResponseData<TodoEntity> update(String todoDate, String todoEmail, TodoDTO todoDTO) {
-        try {
-            // todoRepository에서 해당하는 todoEntity를 찾아 업데이트
-            TodoEntity todoEntity = todoRepository.findByTodoDateAndTodoEmail(todoDate, todoEmail)
-                    .orElseThrow(() -> new IllegalArgumentException("Todo 항목을 찾을 수 없습니다. Date: " + todoDate + ", Email: " + todoEmail));
-
-            todoEntity.setTodoTitle(todoDTO.getTodoTitle());
-            todoEntity.setTodoContent(todoDTO.getTodoContent());
-            todoEntity.setTodoCategory(todoDTO.getTodoCategory());
-            todoEntity.setTodoLikes(todoDTO.getTodoLikes());
-            todoEntity.setTodoCheck(todoDTO.isTodoCheck());
-
-            TodoEntity updatedTodo = todoRepository.save(todoEntity);
-            return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
-        } catch (IllegalArgumentException e) {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-        } catch (Exception e) {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-        }
-    }
+//    public ResponseData<TodoEntity> update(String todoDate, String todoEmail, TodoDTO todoDTO) {
+//        try {
+//            // todoRepository에서 해당하는 todoEntity를 찾아 업데이트
+//            TodoEntity todoEntity = todoRepository.findByTodoDateAndTodoEmail(todoDate, todoEmail)
+//                    .orElseThrow(() -> new IllegalArgumentException("Todo 항목을 찾을 수 없습니다. Date: " + todoDate + ", Email: " + todoEmail));
+//
+//            todoEntity.setTodoTitle(todoDTO.getTodoTitle());
+//            todoEntity.setTodoContent(todoDTO.getTodoContent());
+//            todoEntity.setTodoCategory(todoDTO.getTodoCategory());
+//            todoEntity.setTodoLikes(todoDTO.getTodoLikes());
+//            todoEntity.setTodoCheck(todoDTO.isTodoCheck());
+//
+//            TodoEntity updatedTodo = todoRepository.save(todoEntity);
+//            return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
+//        } catch (IllegalArgumentException e) {
+//            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+//        } catch (Exception e) {
+//            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+//        }
+//    }
 
 
 }
