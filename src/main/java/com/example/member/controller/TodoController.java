@@ -33,12 +33,18 @@ public class TodoController {
     }
 
     @PostMapping(
-            path="/todo/search",
+            path="/todo/searchTitle",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseData<List<TodoDTO>> search(@RequestBody TodoDTO TodoDTO) {
-        return todoService.search(TodoDTO);
+    public ResponseData<List<TodoDTO>> searchTitle(@RequestBody TodoDTO TodoDTO) {
+        return todoService.searchTitle(TodoDTO);
     }
 
+    @PostMapping(
+            path="/todo/searchCategory",
+            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    public ResponseData<List<TodoDTO>> searchCategory(@RequestBody TodoDTO TodoDTO) {
+        return todoService.searchCategory(TodoDTO);
+    }
 
 
     @PostMapping("/todo/delete/{todoDate}") // URL 경로에서 todoDate를 추출하여 삭제 요청 처리
