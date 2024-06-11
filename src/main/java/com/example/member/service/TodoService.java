@@ -12,6 +12,7 @@ import com.example.member.repository.TodoRepository;
 import com.example.member.response.ResponseData;
 import com.example.member.response.StatusCode;
 import com.example.member.response.Success;
+import com.example.member.response.TodoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Sort;
@@ -42,14 +43,13 @@ public class TodoService {
         }
     }
 
-    public ResponseData<List<TodoDTO>> list(MemberDTO memberDTO) {
+    public ResponseData<TodoResponse> list(MemberDTO memberDTO) {
         Optional<MemberEntity> memberEntity = memberRepository.findById(memberDTO.getMemberId());
         if (memberEntity.isPresent()) {
             String memberEmail = memberEntity.get().getMemberEmail();
             LocalDate today = LocalDate.now();
             LocalDate tomorrow = today.plusDays(1);
-            System.out.println(today);
-            System.out.println(tomorrow);
+
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String todayStr = today.format(formatter);
@@ -60,31 +60,31 @@ public class TodoService {
 
             List<TodoDTO> todayDTOList = new ArrayList<>();
             List<TodoDTO> tomorrowDTOList = new ArrayList<>();
-
+            List<TodoDTO> allList = new ArrayList<>();
             if (todayTodoEntity.isPresent()) {
                 for (TodoEntity todoEntity : todayTodoEntity.get()) {
-                    TodoDTO mappedTodoDTO = TodoMapper.INSTANCE.toDTO(todoEntity);
-                    todayDTOList.add(mappedTodoDTO);
+                    TodoDTO Today = TodoMapper.INSTANCE.toDTO(todoEntity);
+                    todayDTOList.add(Today);
+                    allList.add(Today);
                 }
             }
 
             if (tomorrowTodoEntity.isPresent()) {
                 for (TodoEntity todoEntity : tomorrowTodoEntity.get()) {
-                    TodoDTO mappedTodoDTO = TodoMapper.INSTANCE.toDTO(todoEntity);
-                    tomorrowDTOList.add(mappedTodoDTO);
+                    TodoDTO Tomorrow = TodoMapper.INSTANCE.toDTO(todoEntity);
+                    tomorrowDTOList.add(Tomorrow);
+                    allList.add(Tomorrow);
                 }
             }
 
-            if (todayDTOList.isEmpty() && tomorrowDTOList.isEmpty()) {
-                return ResponseData.listres(StatusCode.OK, Success.TRUE, null, null);
-            } else if (todayDTOList.isEmpty()) {
-                return ResponseData.listres(StatusCode.OK, Success.TRUE, null, tomorrowDTOList);
-            } else if (tomorrowDTOList.isEmpty()) {
-                return ResponseData.listres(StatusCode.OK, Success.TRUE, todayDTOList, null);
+            TodoResponse todoResponse = new TodoResponse(todayDTOList, tomorrowDTOList);
+
+            if (allList.isEmpty()) {
+                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
             } else {
-                return ResponseData.listres(StatusCode.OK, Success.TRUE, todayDTOList, tomorrowDTOList);
+                return ResponseData.res(StatusCode.OK, Success.TRUE, todoResponse);
             }
-        } else {
+         } else {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
         }
     }

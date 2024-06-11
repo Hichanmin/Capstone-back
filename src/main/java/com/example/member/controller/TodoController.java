@@ -4,6 +4,7 @@ import com.example.member.dto.MemberDTO;
 import com.example.member.dto.TodoDTO;
 import com.example.member.entity.TodoEntity;
 import com.example.member.response.ResponseData;
+import com.example.member.response.TodoResponse;
 import com.example.member.service.TodoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class TodoController {
     @PostMapping(
             path="/todo/list",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseData<List<TodoDTO>> list(@RequestBody MemberDTO memberDTO) {
+    public ResponseData<TodoResponse> list(@RequestBody MemberDTO memberDTO) {
         return todoService.list(memberDTO);
     }
 
