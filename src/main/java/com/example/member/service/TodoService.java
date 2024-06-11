@@ -127,43 +127,43 @@ public class TodoService {
         }
     }
 
-    public ResponseData<Void> delete(String todoDate, String todoEmail) {
+    public ResponseData<ResponseData> delete(TodoDTO todoDTO) {
+        Optional<TodoEntity> optionalTodo = todoRepository.findById(todoDTO.getId());
+            if (optionalTodo.isPresent()) {
+                TodoEntity todoEntity = optionalTodo.get();
+                todoRepository.delete(todoEntity);
+                return ResponseData.res(StatusCode.OK, Success.TRUE);
+            }
+        return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+    }
+
+
+
+
+    public ResponseData<TodoEntity> update(Long todoId, TodoDTO todoDTO) {
         try {
-            // todoRepository에서 해당하는 todoEntity를 찾아 삭제
-            TodoEntity todoEntity = todoRepository.findByTodoDateAndTodoEmail(todoDate, todoEmail)
-                    .orElseThrow(() -> new IllegalArgumentException("Todo 항목을 찾을 수 없습니다. Date: " + todoDate + ", Email: " + todoEmail));
-            todoRepository.delete(todoEntity);
-            return ResponseData.res(StatusCode.OK, Success.TRUE);
-        } catch (IllegalArgumentException e) {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+            // todoRepository에서 해당하는 todoEntity를 Optional로 찾아 업데이트
+            Optional<TodoEntity> optionalTodo = todoRepository.findById(todoId);
+            if (optionalTodo.isPresent()) {
+                TodoEntity todoEntity = optionalTodo.get();
+
+                todoEntity.setTodoTitle(todoDTO.getTodoTitle());
+                todoEntity.setTodoContent(todoDTO.getTodoContent());
+                todoEntity.setTodoCategory(todoDTO.getTodoCategory());
+                todoEntity.setTodoLikes(todoDTO.getTodoLikes());
+                todoEntity.setTodoCheck(todoDTO.isTodoCheck());
+
+                TodoEntity updatedTodo = todoRepository.save(todoEntity);
+                return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
+            } else {
+                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+            }
         } catch (Exception e) {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
         }
     }
 
 
-
-
-    public ResponseData<TodoEntity> update(String todoDate, String todoEmail, TodoDTO todoDTO) {
-        try {
-            // todoRepository에서 해당하는 todoEntity를 찾아 업데이트
-            TodoEntity todoEntity = todoRepository.findByTodoDateAndTodoEmail(todoDate, todoEmail)
-                    .orElseThrow(() -> new IllegalArgumentException("Todo 항목을 찾을 수 없습니다. Date: " + todoDate + ", Email: " + todoEmail));
-
-            todoEntity.setTodoTitle(todoDTO.getTodoTitle());
-            todoEntity.setTodoContent(todoDTO.getTodoContent());
-            todoEntity.setTodoCategory(todoDTO.getTodoCategory());
-            todoEntity.setTodoLikes(todoDTO.getTodoLikes());
-            todoEntity.setTodoCheck(todoDTO.isTodoCheck());
-
-            TodoEntity updatedTodo = todoRepository.save(todoEntity);
-            return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
-        } catch (IllegalArgumentException e) {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-        } catch (Exception e) {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-        }
-    }
 
 
 }
