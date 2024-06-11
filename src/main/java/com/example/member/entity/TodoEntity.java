@@ -13,7 +13,6 @@ import org.hibernate.annotations.ColumnDefault;
 public class TodoEntity {
 
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
