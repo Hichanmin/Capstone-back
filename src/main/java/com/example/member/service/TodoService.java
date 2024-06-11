@@ -71,11 +71,25 @@ public class TodoService {
             return ResponseData.res(StatusCode.OK, Success.TRUE, new ArrayList<>());
         }
     }
+    public ResponseData<List<TodoDTO>> searchTitle(TodoDTO todoDTO) {
+        String Categorykeyword = todoDTO.getTodoTitle(); // 키워드 추출
+        Optional<List<TodoEntity>> todoEntities = todoRepository.findByTodoTitleContaining(Categorykeyword);
+
+        if (todoEntities.isPresent() && !todoEntities.get().isEmpty()) {
+            List<TodoDTO> todoDTOList = todoEntities.get().stream()
+                    .filter(TodoEntity::isTodoCheck) // todoCheck가 true인 엔티티만 필터링
+                    .map(TodoMapper.INSTANCE::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
+        } else {
+            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
+        }
+    }
 
 
-    public ResponseData<List<TodoDTO>> search(TodoDTO todoDTO) {
-        String keyword = todoDTO.getTodoTitle(); // 키워드 추출
-        Optional<List<TodoEntity>> todoEntities = todoRepository.findByTodoTitleContaining(keyword);
+    public ResponseData<List<TodoDTO>> searchCategory(TodoDTO todoDTO) {
+        String Categorykeyword = todoDTO.getTodoCategory(); // 키워드 추출
+        Optional<List<TodoEntity>> todoEntities = todoRepository.findByTodoCategoryContaining(Categorykeyword);
 
         if (todoEntities.isPresent() && !todoEntities.get().isEmpty()) {
             List<TodoDTO> todoDTOList = todoEntities.get().stream()
