@@ -28,15 +28,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TodoService {
 
+
     private final TodoRepository todoRepository;
     private final MemberRepository memberRepository;
 
     public ResponseData<TodoEntity> save(TodoDTO todoDTO) {
         try {
-            // TodoDTO에서 받은 값을 TodoEntity에 설정
             TodoEntity todoEntity = TodoMapper.INSTANCE.toEntity(todoDTO);
             todoEntity = todoRepository.save(todoEntity);
-            // 저장된 TodoEntity를 ResponseData에 담아 반환
             return ResponseData.res(StatusCode.OK, Success.TRUE);
         } catch (Exception e) {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
@@ -49,6 +48,8 @@ public class TodoService {
             String memberEmail = memberEntity.get().getMemberEmail();
             LocalDate today = LocalDate.now();
             LocalDate tomorrow = today.plusDays(1);
+            System.out.println(today);
+            System.out.println(tomorrow);
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String todayStr = today.format(formatter);

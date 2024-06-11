@@ -15,8 +15,8 @@ public class LikeEntity {
     private Long likeId;
 
     @Column
-    private String likeEmail;
+    private Long likeMemberId;
 
     @Column
-    private String likeTodoId;
+    private Long likeTodoId;
 }

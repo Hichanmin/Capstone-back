@@ -10,7 +10,6 @@ import lombok.*;
 
 public class LikeDTO {
     private Long likeId;
-    private String likeEmail;
-    private String likeTodoId;
+    private Long likeMemberId;
+    private Long likeTodoId;
 }
-// like check 구현중
