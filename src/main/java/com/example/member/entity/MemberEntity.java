@@ -6,6 +6,7 @@ import lombok.*;
 @Entity
 @Setter
 @Getter
+@NoArgsConstructor
 @Table(name = "member") //데이터베이스 user 테이블 생성
 
 public class MemberEntity {
@@ -22,4 +23,6 @@ public class MemberEntity {
 
     @Column(nullable = false, length = 30)
     private String memberName;
+
 }
+
