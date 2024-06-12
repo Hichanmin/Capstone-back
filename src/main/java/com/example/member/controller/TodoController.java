@@ -87,7 +87,4 @@ public class TodoController {
     public ResponseData<List<TodoDTO>> getAllTodos() {
         return todoService.allList(true); // todoCheck 값이 1인 데이터만 가져오도록 요청
     }
-
-
-
 }

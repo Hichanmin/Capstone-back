@@ -29,17 +29,17 @@ public class CommentService {
     public ResponseData<String> addComment(CommentDTO commentDTO) {
         // CommentDTO에서 필요한 정보 추출
         String commentText = commentDTO.getComment();
-        String memberEmail = commentDTO.getMemberEmail(); // String 타입으로 유지
-        Long todoId = commentDTO.getTodoId();
+        String memberEmail = commentDTO.getCommentMemberEmail(); // String 타입으로 유지
+        Long todoId = commentDTO.getCommentTodoId();
 
         // 요청한 투두 아이디가 존재하는지 확인
         Optional<TodoEntity> optionalTodo = todoRepository.findById(todoId);
         if (optionalTodo.isPresent()) {
             // 투두가 존재하면 댓글 추가
             CommentEntity newComment = new CommentEntity();
-            newComment.setTodoId(todoId);
+            newComment.setCommentTodoId(todoId);
             newComment.setComment(commentText);
-            newComment.setMemberEmail(memberEmail); // String 타입으로 저장
+            newComment.setCommentMemberEmail(memberEmail); // String 타입으로 저장
             commentRepository.save(newComment);
 
             return ResponseData.res(StatusCode.OK, Success.TRUE, "Comment added successfully");

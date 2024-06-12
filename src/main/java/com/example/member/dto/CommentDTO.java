@@ -10,7 +10,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,6 +18,6 @@ import java.time.LocalDateTime;
 public class CommentDTO {
     private Long commentId;
     private String comment;
-    private Long todoId; // 투두 항목 ID
-    private String memberEmail;
+    private Long commentTodoId; // 투두 항목 ID
+    private String commentMemberEmail;
 }
