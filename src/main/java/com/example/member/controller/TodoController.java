@@ -1,5 +1,6 @@
 package com.example.member.controller;
 
+import com.example.member.dto.DeleteDTO;
 import com.example.member.dto.TodoDTO;
 import com.example.member.entity.TodoEntity;
 import com.example.member.response.ResponseData;
@@ -32,12 +33,10 @@ public class TodoController {
         return todoService.showlist(todoDTO);
     }
 
-    @PostMapping("/todo/delete") // URL 경로에서 todoDate를 추출하여 삭제 요청 처리
-    public ResponseData<TodoEntity> delete(@RequestBody TodoDTO todoDTO) {
-        return todoService.delete(todoDTO).getData();
+    @PostMapping("/todo/delete")
+    public ResponseData<?> delete(@RequestBody DeleteDTO deleteDTO) {
+        return todoService.delete(deleteDTO);
     }
-
-
 
     @PostMapping("/todo/update/{todoId}") // URL 경로에서 todoId를 추출하여 업데이트 요청 처리
     public ResponseData<TodoEntity> update(@PathVariable Long todoId, @RequestBody TodoDTO todoDTO) {
@@ -49,10 +48,6 @@ public class TodoController {
         return todoService.update(todoId, todoDTO);
     }
 
-
-
-
-
     @RequestMapping(
             path = "/todo/alllist",
             produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }
@@ -60,4 +55,21 @@ public class TodoController {
     public ResponseData<List<TodoDTO>> getAllTodos() {
         return todoService.allList(true); // todoCheck 값이 1인 데이터만 가져오도록 요청
     }
+
+    @PostMapping(
+            path="/todo/searchTitle",
+            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    public ResponseData<List<TodoDTO>> searchTitle(@RequestBody TodoDTO TodoDTO) {
+        return todoService.searchTitle(TodoDTO);
+    }
+
+    @PostMapping(
+            path="/todo/searchCategory",
+            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    public ResponseData<List<TodoDTO>> searchCategory(@RequestBody TodoDTO TodoDTO) {
+        return todoService.searchCategory(TodoDTO);
+    }
+
+
+
 }

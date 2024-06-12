@@ -1,7 +1,10 @@
 package com.example.member.service;
 
+import com.example.member.dto.DeleteDTO;
 import com.example.member.dto.MemberDTO;
 import com.example.member.dto.TodoDTO;
+import com.example.member.dto.UpdateDTO;
+import com.example.member.repository.MemberRepository;
 import org.springframework.http.ResponseEntity;
 import com.example.member.entity.MemberEntity;
 import com.example.member.entity.TodoEntity;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TodoService {
 
+    private final MemberRepository memberRepository;
     private final TodoRepository todoRepository;
 
     public ResponseData<TodoEntity> save(TodoDTO todoDTO) {
@@ -104,55 +108,39 @@ public class TodoService {
     }
 
 
-
-
-
-
-
-
-
-    // 나머지 메서드는 동일하게 유지
-
-
-    public ResponseData<TodoEntity> likeTodo(Long id) {
-        Optional<TodoEntity> optionalTodo = todoRepository.findById(id);
-        if (optionalTodo.isPresent()) {
-            TodoEntity todo = optionalTodo.get();
-            // 좋아요 수가 null인 경우만 초기화하고, 그렇지 않으면 현재 좋아요 수를 사용
-            int currentLikes = todo.getTodoLikes();
-            todo.setTodoLikes(currentLikes + 1); // 좋아요 수 증가
-            TodoEntity updatedTodo = todoRepository.save(todo);
-            return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
-        } else {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-        }
-    }
-
-    public ResponseData<ResponseData> delete(TodoDTO todoDTO) {
-        Optional<TodoEntity> optionalTodo = todoRepository.findById(todoDTO.getId());
-            if (optionalTodo.isPresent()) {
-                TodoEntity todoEntity = optionalTodo.get();
-                todoRepository.delete(todoEntity);
+    public ResponseData<?> delete(DeleteDTO deleteDTO) {
+        Optional<MemberEntity> optionalMemberEntity = memberRepository.findById(deleteDTO.getMemberId());
+        if (optionalMemberEntity.isPresent()) {
+            String memberEmail = optionalMemberEntity.get().getMemberEmail();
+            Optional<TodoEntity> optionalTodoEntity = todoRepository.findByIdAndTodoEmail(deleteDTO.getTodoId(), memberEmail);
+            if (optionalTodoEntity.isPresent()) {
+                optionalTodoEntity.ifPresent(todoRepository::delete);
                 return ResponseData.res(StatusCode.OK, Success.TRUE);
+            } else {
+                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
             }
+        }
         return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
     }
 
 
-
-
-    public ResponseData<TodoEntity> update(Long todoId, TodoDTO todoDTO) {
+    public ResponseData<TodoEntity> update(UpdateDTO updateDTO) {
         try {
-            // todoRepository에서 해당하는 todoEntity를 Optional로 찾아 업데이트
-            Optional<TodoEntity> optionalTodo = todoRepository.findById(todoId);
-            if (optionalTodo.isPresent()) {
-                TodoEntity todoEntity = optionalTodo.get();
+            TodoEntity todoEntity = Mapper.INSTANCE.updateDTO;
+            Optional<MemberEntity> optionalMemberEntity = memberRepository.findById(updateDTO.getMemberId());
+            if (optionalMemberEntity.isPresent()) {
+                String memberEmail = optionalMemberEntity.get().getMemberEmail();
+                Optional<TodoEntity> optionalTodoEntity = todoRepository.findByIdAndTodoEmail(updateDTO.getTodoId(), memberEmail);
+                if(optionalTodoEntity.isPresent()) {
 
+                }
                 todoEntity.setTodoTitle(todoDTO.getTodoTitle());
                 todoEntity.setTodoContent(todoDTO.getTodoContent());
                 todoEntity.setTodoCategory(todoDTO.getTodoCategory());
                 todoEntity.setTodoLikes(todoDTO.getTodoLikes());
                 todoEntity.setTodoCheck(todoDTO.isTodoCheck());
+
+                todoRepository.save(todoEntity);
 
                 TodoEntity updatedTodo = todoRepository.save(todoEntity);
                 return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
