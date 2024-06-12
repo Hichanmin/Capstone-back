@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 @Component
 public class DataLoader implements CommandLineRunner {
 
@@ -26,86 +30,42 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        loadMemberData();
-        loadTodoData();
-        loadCommentData();
+        // 더미 데이터 로드
+        loadDummyData(50); // 50개의 더미 데이터 생성
     }
 
-    private void loadMemberData() {
-        MemberEntity member1 = new MemberEntity();
-        member1.setMemberEmail("user1@example.com");
-        member1.setMemberPassword("password1");
-        member1.setMemberName("User One");
+    private void loadDummyData(int count) {
+        Random random = new Random();
 
-        MemberEntity member2 = new MemberEntity();
-        member2.setMemberEmail("user2@example.com");
-        member2.setMemberPassword("password2");
-        member2.setMemberName("User Two");
+        for (int i = 0; i < count; i++) {
+            // 회원 생성
+            MemberEntity member = new MemberEntity();
+            member.setMemberEmail("user" + i + "@example.com");
+            member.setMemberPassword("password" + i);
+            member.setMemberName("User " + i);
 
-        MemberEntity member3 = new MemberEntity();
-        member3.setMemberEmail("user3@example.com");
-        member3.setMemberPassword("password3");
-        member3.setMemberName("User Three");
+            memberRepository.save(member);
 
-        memberRepository.save(member1);
-        memberRepository.save(member2);
-        memberRepository.save(member3);
-    }
+            // 투두 생성
+            TodoEntity todo = new TodoEntity();
+            todo.setTodoEmail(member.getMemberEmail());
+            todo.setTodoTitle("Todo Title " + i);
+            todo.setTodoContent("Content for todo " + i);
+            todo.setTodoLike(random.nextInt(100)); // 0부터 99까지의 랜덤한 좋아요 수
+            todo.setTodoDate("2024-01-01");
+            todo.setTodoCategory("#Category1 #Category2 #Category3");
+            todo.setTodoCheck(random.nextBoolean()); // 랜덤한 체크 여부
+            todo.setTodoLikes(random.nextInt(100)); // 0부터 99까지의 랜덤한 좋아요 수
 
-    private void loadTodoData() {
-        TodoEntity todo1 = new TodoEntity();
-        todo1.setTodoEmail("user1@example.com");
-        todo1.setTodoTitle("Todo Title 1");
-        todo1.setTodoContent("Content for todo 1");
-        todo1.setTodoLike(0);
-        todo1.setTodoDate("2024-01-01");
-        todo1.setTodoCategory("#일, #운동, #힘들다");
-        todo1.setTodoCheck(true);
-        todo1.setTodoLikes(0);
+            todoRepository.save(todo);
 
-        TodoEntity todo2 = new TodoEntity();
-        todo2.setTodoEmail("user2@example.com");
-        todo2.setTodoTitle("Todo Title 2");
-        todo2.setTodoContent("Content for todo 2");
-        todo2.setTodoLike(0);
-        todo2.setTodoDate("2024-01-02");
-        todo2.setTodoCategory("#게임 #롤 #피파");
-        todo2.setTodoCheck(false);
-        todo2.setTodoLikes(0);
+            // 댓글 생성
+            CommentEntity comment = new CommentEntity();
+            comment.setComment("Comment for todo " + i + " by user " + i);
+            comment.setCommentMemberEmail(member.getMemberEmail());
+            comment.setCommentTodoId(todo.getId());
 
-        TodoEntity todo3 = new TodoEntity();
-        todo3.setTodoEmail("user3@example.com");
-        todo3.setTodoTitle("Todo Title 3");
-        todo3.setTodoContent("Content for todo 3");
-        todo3.setTodoLike(0);
-        todo3.setTodoDate("2024-01-03");
-        todo3.setTodoCategory("#쇼핑 #옷구경 #나들이");
-        todo3.setTodoCheck(true);
-        todo3.setTodoLikes(0);
-
-        todoRepository.save(todo1);
-        todoRepository.save(todo2);
-        todoRepository.save(todo3);
-    }
-
-    private void loadCommentData() {
-        CommentEntity comment1 = new CommentEntity();
-        comment1.setComment("Comment for todo 1 by user1");
-        comment1.setCommentTodoId(1L);
-        comment1.setCommentMemberEmail("user1@example.com");
-
-        CommentEntity comment2 = new CommentEntity();
-        comment2.setComment("Comment for todo 2 by user2");
-        comment2.setCommentTodoId(2L);
-        comment2.setCommentMemberEmail("user2@example.com");
-
-        CommentEntity comment3 = new CommentEntity();
-        comment3.setComment("Comment for todo 3 by user3");
-        comment3.setCommentTodoId(3L);
-        comment3.setCommentMemberEmail("user3@example.com");
-
-        commentRepository.save(comment1);
-        commentRepository.save(comment2);
-        commentRepository.save(comment3);
+            commentRepository.save(comment);
+        }
     }
 }

@@ -8,11 +8,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "comments")
-@EntityListeners(AuditingEntityListener.class)
+@Setter
+@Getter
+@NoArgsConstructor
+@Table(name = "comment")
 public class CommentEntity {
 
     @Id
@@ -25,6 +25,6 @@ public class CommentEntity {
     @Column(nullable = false)
     private Long commentTodoId; // 투두 항목 ID
 
-    @Column(name = "comment_member_email", nullable = false) // 데이터베이스 컬럼명 지정
+    @Column(nullable = false) // 데이터베이스 컬럼명 지정
     private String commentMemberEmail;
 }
