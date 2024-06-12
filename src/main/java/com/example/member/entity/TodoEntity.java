@@ -13,7 +13,6 @@ import org.hibernate.annotations.ColumnDefault;
 public class TodoEntity {
 
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,13 +29,10 @@ public class TodoEntity {
     @Column(nullable = false, length = 15)
     private String todoDate;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 50)
     private String todoCategory;
 
     @Column(nullable = false, length = 15)
     private boolean todoCheck;
-
-    @Column(nullable = false, length = 15)
-    private int todoLikes;
 
 }
