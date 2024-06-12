@@ -49,4 +49,25 @@ public class CommentService {
         }
 
     }
+
+    public ResponseData<String> deleteComment(CommentDTO commentDTO) {
+        try {
+            System.out.println("Received commentId from client: " + commentDTO); // 클라이언트에서 받은 commentId 출력
+            Optional<CommentEntity> commentEntityOptional = commentRepository.findById(commentDTO.getCommentId());
+            if (commentEntityOptional.isEmpty()) {
+                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, "Comment not found");
+            }
+            CommentEntity commentEntity = commentEntityOptional.get();
+            commentRepository.delete(commentEntity);
+            // 변경 사항을 즉시 데이터베이스에 반영하기 위해 flush() 호출
+            commentRepository.flush();
+
+            return ResponseData.res(StatusCode.OK, Success.TRUE, "Comment deleted successfully");
+        } catch (Exception e) {
+            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, "An error occurred while deleting the comment");
+        }
+    }
+
+
 }
+
