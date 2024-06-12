@@ -1,5 +1,7 @@
 package com.example.member.response;
 
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 public class StatusCode {
     public static final int OK = 200;
     public static final int BAD_REQUEST = 400;

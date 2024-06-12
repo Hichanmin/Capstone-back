@@ -35,7 +35,4 @@ public class TodoEntity {
     @Column(nullable = false, length = 15)
     private boolean todoCheck;
 
-    @Column(nullable = false, length = 15)
-    private int todoLikes;
-
 }

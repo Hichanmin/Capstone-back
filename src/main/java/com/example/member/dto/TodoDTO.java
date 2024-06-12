@@ -18,5 +18,4 @@ public class TodoDTO {
     private String todoDate;
     private boolean todoCheck;
     private String todoEmail;
-    private int todoLikes;
 }

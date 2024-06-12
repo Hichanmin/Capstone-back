@@ -2,12 +2,16 @@ package com.example.member.controller;
 
 import com.example.member.dto.DeleteDTO;
 import com.example.member.dto.TodoDTO;
+import com.example.member.dto.UpdateDTO;
 import com.example.member.entity.TodoEntity;
 import com.example.member.response.ResponseData;
+import com.example.member.response.StatusCode;
+import com.example.member.response.Success;
 import com.example.member.service.TodoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,60 +20,85 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TodoController {
 
-    private final TodoService todoService; // TodoService 주입
+    private final TodoService todoService;
 
     @PostMapping(
             path = "/todo/create",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseData<TodoEntity> save(@RequestBody TodoDTO todoDTO) {
-        return todoService.save(todoDTO); // TodoService의 인스턴스 메서드 호출
+    public ResponseEntity<ResponseData<TodoEntity>> save(@RequestBody TodoDTO todoDTO) {
+        try {
+            ResponseData<TodoEntity> responseData = todoService.save(todoDTO);
+            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+        }
     }
 
     @PostMapping(
             path="/todo/mylist",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseData<List<TodoDTO>> showmylist(@RequestBody TodoDTO todoDTO) {
-        // 서비스의 메서드를 호출하여 결과 반환
-        return todoService.showlist(todoDTO);
+    public ResponseEntity<ResponseData<List<TodoDTO>>> showmylist(@RequestBody TodoDTO todoDTO) {
+        try {
+            ResponseData<List<TodoDTO>> responseData = todoService.showlist(todoDTO);
+            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+        }
     }
 
     @PostMapping("/todo/delete")
-    public ResponseData<?> delete(@RequestBody DeleteDTO deleteDTO) {
-        return todoService.delete(deleteDTO);
+    public ResponseEntity<ResponseData<?>> delete(@RequestBody DeleteDTO deleteDTO) {
+        try {
+            ResponseData<?> responseData = todoService.delete(deleteDTO);
+            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+        }
     }
 
-    @PostMapping("/todo/update/{todoId}") // URL 경로에서 todoId를 추출하여 업데이트 요청 처리
-    public ResponseData<TodoEntity> update(@PathVariable Long todoId, @RequestBody TodoDTO todoDTO) {
-        // 로그에 요청이 온 값을 출력합니다.
-        System.out.println("Received todoId: " + todoId);
-        System.out.println("Received todoDTO: " + todoDTO);
-
-        // 업데이트 서비스 호출
-        return todoService.update(todoId, todoDTO);
+    @PostMapping("/todo/update")
+    public ResponseEntity<ResponseData<TodoEntity>> update(@RequestBody UpdateDTO updateDTO) {
+        try {
+            ResponseData<TodoEntity> responseData = todoService.update(updateDTO);
+            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+        }
     }
 
-    @RequestMapping(
-            path = "/todo/alllist",
+    @PostMapping(
+            path = "/todo/allList",
             produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }
     )
-    public ResponseData<List<TodoDTO>> getAllTodos() {
-        return todoService.allList(true); // todoCheck 값이 1인 데이터만 가져오도록 요청
+    public ResponseEntity<ResponseData<List<TodoDTO>>> getAllTodos() {
+        try {
+            ResponseData<List<TodoDTO>> responseData = todoService.allList(true);
+            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+        }
     }
 
     @PostMapping(
             path="/todo/searchTitle",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseData<List<TodoDTO>> searchTitle(@RequestBody TodoDTO TodoDTO) {
-        return todoService.searchTitle(TodoDTO);
+    public ResponseEntity<ResponseData<List<TodoDTO>>> searchTitle(@RequestBody TodoDTO TodoDTO) {
+        try {
+            ResponseData<List<TodoDTO>> responseData = todoService.searchTitle(TodoDTO);
+            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+        }
     }
 
-    @PostMapping(
-            path="/todo/searchCategory",
-            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseData<List<TodoDTO>> searchCategory(@RequestBody TodoDTO TodoDTO) {
-        return todoService.searchCategory(TodoDTO);
+    @PostMapping("/todo/searchCategory")
+    public ResponseEntity<ResponseData<List<TodoDTO>>> searchCategory(@RequestBody TodoDTO todoDTO) {
+        try {
+            ResponseData<List<TodoDTO>> responseData = todoService.searchCategory(todoDTO);
+            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+        }
     }
-
-
-
 }
+

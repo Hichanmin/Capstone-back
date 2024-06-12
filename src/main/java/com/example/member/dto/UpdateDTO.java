@@ -13,6 +13,5 @@ public class UpdateDTO {
     private String todoTitle;
     private String todoContent;
     private String todoCategory;
-    private int todoLikes;
     private boolean todoCheck;
 }
