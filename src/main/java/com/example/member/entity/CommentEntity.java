@@ -23,8 +23,8 @@ public class CommentEntity {
     private String comment;
 
     @Column(nullable = false)
-    private Long todoId; // 투두 항목 ID
+    private Long commentTodoId; // 투두 항목 ID
 
-    @Column(nullable = false)
-    private String memberEmail;
+    @Column(name = "comment_member_email", nullable = false) // 데이터베이스 컬럼명 지정
+    private String commentMemberEmail;
 }
