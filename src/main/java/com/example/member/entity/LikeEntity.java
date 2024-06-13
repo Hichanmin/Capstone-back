@@ -12,7 +12,7 @@ public class LikeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long likeId;
+    private Long id;
 
     @Column
     private Long likeMemberId;
