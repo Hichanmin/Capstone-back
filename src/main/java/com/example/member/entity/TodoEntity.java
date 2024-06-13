@@ -12,7 +12,6 @@ import org.hibernate.annotations.ColumnDefault;
 
 public class TodoEntity {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,8 +23,10 @@ public class TodoEntity {
     private String todoTitle;
     @Lob
     private String todoContent;
+
     @ColumnDefault("0")
     private int todoLike;
+
     @Column(nullable = false, length = 15)
     private String todoDate;
 
@@ -34,5 +35,8 @@ public class TodoEntity {
 
     @Column(nullable = false, length = 15)
     private boolean todoCheck;
+
+    @ColumnDefault("false")
+    private boolean todoLikeCheck;
 
 }
