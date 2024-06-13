@@ -16,7 +16,7 @@ public class TodoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long todoId;
+    private Long id;
 
     @Column(nullable = false, length = 30)
     private String todoEmail;
@@ -25,8 +25,10 @@ public class TodoEntity {
     private String todoTitle;
     @Lob
     private String todoContent;
+
     @ColumnDefault("0")
     private int todoLike;
+
     @Column(nullable = false, length = 15)
     private String todoDate;
 
@@ -36,7 +38,7 @@ public class TodoEntity {
     @Column(nullable = false, length = 15)
     private boolean todoCheck;
 
-    @Column(nullable = false, length = 15)
-    private int todoLikes;
+    @ColumnDefault("false")
+    private boolean todoLikeCheck;
 
 }

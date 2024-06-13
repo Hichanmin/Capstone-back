@@ -1,15 +1,14 @@
 package com.example.member.dto;
 
+
 import lombok.*;
-
-
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class TodoDTO {
+public class ResponseMyTodoDTO {
     private Long id;
     private String todoTitle;
     private String todoContent;
@@ -17,6 +16,4 @@ public class TodoDTO {
     private int todoLike;
     private String todoDate;
     private boolean todoCheck;
-    private String todoEmail;
-    private boolean todoLikeCheck;
 }

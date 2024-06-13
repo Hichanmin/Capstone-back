@@ -1,12 +1,13 @@
 package com.example.member.service;
 
 import java.time.LocalDate;
-import com.example.member.dto.MemberDTO;
-import com.example.member.dto.TodoDTO;
+
+import com.example.member.dto.*;
+import com.example.member.entity.LikeEntity;
 import com.example.member.entity.MemberEntity;
 import com.example.member.entity.TodoEntity;
-import com.example.member.mapper.MemberMapper;
 import com.example.member.mapper.TodoMapper;
+import com.example.member.repository.LikeRepository;
 import com.example.member.repository.MemberRepository;
 import com.example.member.repository.TodoRepository;
 import com.example.member.response.ResponseData;
@@ -14,78 +15,90 @@ import com.example.member.response.StatusCode;
 import com.example.member.response.Success;
 import com.example.member.response.TodoResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.time.format.DateTimeFormatter;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TodoService {
 
-
     private final TodoRepository todoRepository;
     private final MemberRepository memberRepository;
+    private final LikeRepository likeRepository;
+
+    Logger logger = LoggerFactory.getLogger(TodoService.class);
+
+    // 오늘 날짜와 내일 날짜 반환 yyyy-MM-dd format 으로 반환
+    public DateDTO getDate() {
+        try {
+            LocalDate today = LocalDate.now();
+            LocalDate tomorrow = today.plusDays(1);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String todayStr = today.format(formatter);
+            String tomorrowStr = tomorrow.format(formatter);
+            System.out.println("getDate today: " + todayStr + ", tomorrow :" + tomorrowStr + "Success");
+            return new DateDTO(todayStr, tomorrowStr);
+        } catch (Exception e) {
+            System.out.println("getDate error"); //getDate 함수 에러
+            return null;
+        }
+    }
 
     public ResponseData<TodoEntity> save(TodoDTO todoDTO) {
         try {
             TodoEntity todoEntity = TodoMapper.INSTANCE.toEntity(todoDTO);
-            todoEntity = todoRepository.save(todoEntity);
+            todoRepository.save(todoEntity);
             return ResponseData.res(StatusCode.OK, Success.TRUE);
         } catch (Exception e) {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
         }
     }
 
+    public List<ResponseMyTodoDTO> myTodoList(String memberEmail, String date) {
+        Optional<List<TodoEntity>> optionalTodoEntityList = todoRepository.findByTodoDateAndTodoEmail(date, memberEmail);
+        System.out.println("로그인중인 멤버 이메일 = " + memberEmail + "불러온 날짜" + date +
+                "로그인중인 멤버의 불러온 날짜에 맞는 투두들 = " + optionalTodoEntityList);
+
+        List<ResponseMyTodoDTO> myTodoDTOList = new ArrayList<>();
+
+        if (optionalTodoEntityList.isPresent()) {
+            for(TodoEntity todoEntity : optionalTodoEntityList.get()) {
+                ResponseMyTodoDTO myTodoDTO = TodoMapper.INSTANCE.toMyListDTO(todoEntity);
+                myTodoDTOList.add(myTodoDTO);
+            }
+            return myTodoDTOList;
+        } else {
+            // 날짜에 맞는 투두가 없을 때
+            System.out.println(date + "날짜의 투두가 없습니다");
+            return myTodoDTOList = null;
+        }
+    }
     public ResponseData<TodoResponse> list(MemberDTO memberDTO) {
-        Optional<MemberEntity> memberEntity = memberRepository.findById(memberDTO.getMemberId());
+        Optional<MemberEntity> memberEntity = memberRepository.findById(memberDTO.getId());
+        System.out.println("멤버 id 받아옴 : " + memberDTO.getId());
+
         if (memberEntity.isPresent()) {
             String memberEmail = memberEntity.get().getMemberEmail();
-            LocalDate today = LocalDate.now();
-            LocalDate tomorrow = today.plusDays(1);
+            String today = getDate().getToday();
+            String tomorrow = getDate().getTomorrow();
 
+            List<ResponseMyTodoDTO> todayTodoList = myTodoList(memberEmail, today);
+            List<ResponseMyTodoDTO> tomorrowTodoList = myTodoList(memberEmail, tomorrow);
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String todayStr = today.format(formatter);
-            String tomorrowStr = tomorrow.format(formatter);
+            TodoResponse todoResponse = new TodoResponse(todayTodoList, tomorrowTodoList);
 
-            Optional<List<TodoEntity>> todayTodoEntity = todoRepository.findByTodoDateAndTodoEmail(todayStr, memberEmail);
-            Optional<List<TodoEntity>> tomorrowTodoEntity = todoRepository.findByTodoDateAndTodoEmail(tomorrowStr, memberEmail);
-
-            List<TodoDTO> todayDTOList = new ArrayList<>();
-            List<TodoDTO> tomorrowDTOList = new ArrayList<>();
-            List<TodoDTO> allList = new ArrayList<>();
-            if (todayTodoEntity.isPresent()) {
-                for (TodoEntity todoEntity : todayTodoEntity.get()) {
-                    TodoDTO Today = TodoMapper.INSTANCE.toDTO(todoEntity);
-                    todayDTOList.add(Today);
-                    allList.add(Today);
-                }
-            }
-
-            if (tomorrowTodoEntity.isPresent()) {
-                for (TodoEntity todoEntity : tomorrowTodoEntity.get()) {
-                    TodoDTO Tomorrow = TodoMapper.INSTANCE.toDTO(todoEntity);
-                    tomorrowDTOList.add(Tomorrow);
-                    allList.add(Tomorrow);
-                }
-            }
-
-            TodoResponse todoResponse = new TodoResponse(todayDTOList, tomorrowDTOList);
-
-            if (allList.isEmpty()) {
-                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
-            } else {
-                return ResponseData.res(StatusCode.OK, Success.TRUE, todoResponse);
-            }
-         } else {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, null);
+            return ResponseData.res(StatusCode.OK, Success.TRUE, todoResponse);
+        } else {
+            System.out.println("REQUEST 값 오류"); // memberId 에 맞는 memberEntity 가 없음
+            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
         }
     }
 
@@ -114,19 +127,6 @@ public class TodoService {
     // 나머지 메서드는 동일하게 유지
 
 
-    public ResponseData<TodoEntity> likeTodo(Long id) {
-        Optional<TodoEntity> optionalTodo = todoRepository.findById(id);
-        if (optionalTodo.isPresent()) {
-            TodoEntity todo = optionalTodo.get();
-            // 좋아요 수가 null인 경우만 초기화하고, 그렇지 않으면 현재 좋아요 수를 사용
-            int currentLikes = todo.getTodoLikes();
-            todo.setTodoLikes(currentLikes + 1); // 좋아요 수 증가
-            TodoEntity updatedTodo = todoRepository.save(todo);
-            return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
-        } else {
-            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-        }
-    }
 
 //    public ResponseData<Void> delete(String todoDate, String todoEmail) {
 //        try {

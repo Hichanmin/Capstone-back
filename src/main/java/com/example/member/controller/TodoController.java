@@ -7,7 +7,6 @@ import com.example.member.response.ResponseData;
 import com.example.member.response.TodoResponse;
 import com.example.member.service.TodoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +25,7 @@ public class TodoController {
         return todoService.save(todoDTO);
     }
 
-    @PostMapping(
+    @GetMapping(
             path="/todo/list",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
     public ResponseData<TodoResponse> list(@RequestBody MemberDTO memberDTO) {

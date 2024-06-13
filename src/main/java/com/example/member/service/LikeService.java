@@ -20,17 +20,28 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final TodoRepository todoRepository;
 
-    public ResponseData<LikeEntity> likeCheck(LikeDTO likeDTO) {
+    public ResponseData<LikeEntity> like(LikeDTO likeDTO) {
         Optional<LikeEntity> likeInfo = likeRepository.findByLikeMemberIdAndLikeTodoId(likeDTO.getLikeMemberId(), likeDTO.getLikeTodoId());
         Optional<TodoEntity> optionalTodoEntity = todoRepository.findById(likeDTO.getLikeTodoId());
         if (likeInfo.isEmpty()) {
             LikeEntity likeEntity = LikeMapper.INSTANCE.toEntity(likeDTO);
             likeEntity = likeRepository.save(likeEntity);
-            return ResponseData.res(StatusCode.OK, Success.TRUE);
+            if (optionalTodoEntity.isPresent()){
+                TodoEntity todoEntity = optionalTodoEntity.get();
+                int like = todoEntity.getTodoLike() + 1;
+                todoEntity.setTodoLike(like);
+                todoRepository.save(todoEntity);
+            }
         } else {
             likeRepository.delete(likeInfo.get());
-            return ResponseData.res(StatusCode.OK, Success.TRUE);
+            if (optionalTodoEntity.isPresent()){
+                TodoEntity todoEntity = optionalTodoEntity.get();
+                int like = todoEntity.getTodoLike() - 1;
+                todoEntity.setTodoLike(like);
+                todoRepository.save(todoEntity);
+            }
         }
+        return ResponseData.res(StatusCode.OK, Success.TRUE);
     }
 
 }
