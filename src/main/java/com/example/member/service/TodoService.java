@@ -3,22 +3,25 @@ package com.example.member.service;
 import java.time.LocalDate;
 
 import com.example.member.dto.*;
-import com.example.member.entity.LikeEntity;
+import com.example.member.dto.DeleteDTO;
+import com.example.member.dto.TodoDTO;
+import com.example.member.dto.UpdateDTO;
+import com.example.member.exception.BadRequest;
+import com.example.member.exception.NotFound;
+import com.example.member.mapper.UpdateMapper;
+import com.example.member.repository.MemberRepository;
 import com.example.member.entity.MemberEntity;
 import com.example.member.entity.TodoEntity;
 import com.example.member.mapper.TodoMapper;
-import com.example.member.repository.LikeRepository;
-import com.example.member.repository.MemberRepository;
 import com.example.member.repository.TodoRepository;
 import com.example.member.response.ResponseData;
 import com.example.member.response.StatusCode;
 import com.example.member.response.Success;
 import com.example.member.response.TodoResponse;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import java.time.format.DateTimeFormatter;
 
 
@@ -27,13 +30,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@ResponseStatus
 public class TodoService {
 
-    private final TodoRepository todoRepository;
     private final MemberRepository memberRepository;
-    private final LikeRepository likeRepository;
-
-    Logger logger = LoggerFactory.getLogger(TodoService.class);
+    private final TodoRepository todoRepository;
 
     // 오늘 날짜와 내일 날짜 반환 yyyy-MM-dd format 으로 반환
     public DateDTO getDate() {
@@ -74,12 +75,10 @@ public class TodoService {
                 ResponseMyTodoDTO myTodoDTO = TodoMapper.INSTANCE.toMyListDTO(todoEntity);
                 myTodoDTOList.add(myTodoDTO);
             }
-            return myTodoDTOList;
         } else {
-            // 날짜에 맞는 투두가 없을 때
             System.out.println(date + "날짜의 투두가 없습니다");
-            return myTodoDTOList = null;
         }
+        return myTodoDTOList;
     }
     public ResponseData<TodoResponse> list(MemberDTO memberDTO) {
         Optional<MemberEntity> memberEntity = memberRepository.findById(memberDTO.getId());
@@ -103,68 +102,140 @@ public class TodoService {
     }
 
 
-
-    public ResponseData<List<TodoDTO>> allList(boolean todoCheck) { // 자료형을 boolean으로 변경
-        if (todoCheck) { // boolean 값에 따라 수정
+    public ResponseData<List<TodoDTO>> allList(boolean todoCheck) {
+        if (todoCheck) {
             List<TodoEntity> allTodos = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
 
-            // todoCheck 값이 true인 TodoEntity만 필터링
             List<TodoEntity> filteredTodos = allTodos.stream()
-                    .filter(todoEntity -> todoEntity.isTodoCheck()) // boolean 값 확인
-                    .collect(Collectors.toList());
+                    .filter(TodoEntity::isTodoCheck)
+                    .toList();
 
             List<TodoDTO> todoDTOList = filteredTodos.stream()
-                    .map(todoEntity -> TodoMapper.INSTANCE.toDTO(todoEntity))
+                    .map(TodoMapper.INSTANCE::toDTO)
                     .collect(Collectors.toList());
 
             return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
         } else {
-            // todoCheck가 false인 경우에는 빈 리스트 반환
             return ResponseData.res(StatusCode.OK, Success.TRUE, new ArrayList<>());
         }
     }
 
-    // 나머지 메서드는 동일하게 유지
+    public ResponseData<List<TodoDTO>> searchTitle(TodoDTO todoDTO) {
+        try {
+            String titleKeyword = todoDTO.getTodoTitle(); // 키워드 추출
+            Optional<List<TodoEntity>> todoEntities = todoRepository.findByTodoTitleContaining(titleKeyword);
+
+            if (todoEntities.isPresent() && !todoEntities.get().isEmpty()) {
+                List<TodoDTO> todoDTOList = todoEntities.get().stream()
+                        .filter(TodoEntity::isTodoCheck) // todoCheck 가 true 인 엔티티만 필터링
+                        .map(TodoMapper.INSTANCE::toDTO)
+                        .collect(Collectors.toList());
+                return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
+            } else {
+                return ResponseData.res(StatusCode.NOT_FOUND, Success.FALSE);
+            }
+        } catch (Exception e) {
+            // 기타 예외 처리
+            return ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE);
+        }
+    }
 
 
 
-//    public ResponseData<Void> delete(String todoDate, String todoEmail) {
-//        try {
-//            // todoRepository에서 해당하는 todoEntity를 찾아 삭제
-//            TodoEntity todoEntity = todoRepository.findByTodoDateAndTodoEmail(todoDate, todoEmail)
-//                    .orElseThrow(() -> new IllegalArgumentException("Todo 항목을 찾을 수 없습니다. Date: " + todoDate + ", Email: " + todoEmail));
-//            todoRepository.delete(todoEntity);
-//            return ResponseData.res(StatusCode.OK, Success.TRUE);
-//        } catch (IllegalArgumentException e) {
-//            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-//        } catch (Exception e) {
-//            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-//        }
-//    }
-//   같은날에 todo가 여러개 있을 수 있음
+    public ResponseData<List<TodoDTO>> searchCategory(TodoDTO todoDTO) {
+        try {
+            String categoryKeyword = todoDTO.getTodoCategory();
+            Optional<List<TodoEntity>> todoEntities = todoRepository.findByTodoCategoryContaining(categoryKeyword);
+
+            if (todoEntities.isPresent()) {
+                List<TodoDTO> todoDTOList = todoEntities.get().stream()
+                        .filter(TodoEntity::isTodoCheck)
+                        .map(TodoMapper.INSTANCE::toDTO)
+                        .collect(Collectors.toList());
+
+                if (!todoDTOList.isEmpty()) {
+                    return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
+                } else {
+                    return ResponseData.res(StatusCode.NOT_FOUND, Success.FALSE);
+                }
+            } else {
+                return ResponseData.res(StatusCode.NOT_FOUND, Success.FALSE);
+            }
+        } catch (Exception e) {
+            // 기타 예외 처리
+            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+        }
+    }
 
 
 
-//    public ResponseData<TodoEntity> update(String todoDate, String todoEmail, TodoDTO todoDTO) {
-//        try {
-//            // todoRepository에서 해당하는 todoEntity를 찾아 업데이트
-//            TodoEntity todoEntity = todoRepository.findByTodoDateAndTodoEmail(todoDate, todoEmail)
-//                    .orElseThrow(() -> new IllegalArgumentException("Todo 항목을 찾을 수 없습니다. Date: " + todoDate + ", Email: " + todoEmail));
-//
-//            todoEntity.setTodoTitle(todoDTO.getTodoTitle());
-//            todoEntity.setTodoContent(todoDTO.getTodoContent());
-//            todoEntity.setTodoCategory(todoDTO.getTodoCategory());
-//            todoEntity.setTodoLikes(todoDTO.getTodoLikes());
-//            todoEntity.setTodoCheck(todoDTO.isTodoCheck());
-//
-//            TodoEntity updatedTodo = todoRepository.save(todoEntity);
-//            return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
-//        } catch (IllegalArgumentException e) {
-//            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-//        } catch (Exception e) {
-//            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
-//        }
-//    }
+
+
+
+    public ResponseData<?> delete(DeleteDTO deleteDTO) {
+        Optional<MemberEntity> optionalMemberEntity = memberRepository.findById(deleteDTO.getMemberId());
+        if (optionalMemberEntity.isPresent()) {
+            String memberEmail = optionalMemberEntity.get().getMemberEmail();
+            Optional<TodoEntity> optionalTodoEntity = todoRepository.findByIdAndTodoEmail(deleteDTO.getTodoId(), memberEmail);
+            if (optionalTodoEntity.isPresent()) {
+                optionalTodoEntity.ifPresent(todoRepository::delete);
+                return ResponseData.res(StatusCode.OK, Success.TRUE);
+            } else {
+                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+            }
+        }
+        return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+    }
+
+
+    public ResponseData<TodoEntity> update(UpdateDTO updateDTO) {
+        try {
+            // UpdateDTO 를 TodoEntity 로 변환
+            TodoEntity todoEntity = UpdateMapper.INSTANCE.toEntity(updateDTO);
+
+            // MemberEntity 를 조회
+            Optional<MemberEntity> optionalMemberEntity = memberRepository.findById(updateDTO.getMemberId());
+            System.out.println("멤버엔티티 : " + optionalMemberEntity);
+            if (optionalMemberEntity.isPresent()) {
+                String memberEmail = optionalMemberEntity.get().getMemberEmail();
+                System.out.println("멤버이메일" + memberEmail);
+
+                Optional<TodoEntity> optionalTodoEntity = todoRepository.findByIdAndTodoEmail(updateDTO.getTodoId(), memberEmail);
+                if (optionalTodoEntity.isPresent()) {
+                    System.out.println("투두엔티티" + optionalTodoEntity);
+                    TodoEntity existingTodo = optionalTodoEntity.get();
+                    System.out.println("익사이팅 투두" + existingTodo );
+                    // 기존 TodoEntity 에 업데이트할 내용을 설정
+                    existingTodo.setTodoTitle(todoEntity.getTodoTitle());
+                    existingTodo.setTodoContent(todoEntity.getTodoContent());
+                    existingTodo.setTodoCategory(todoEntity.getTodoCategory());
+                    existingTodo.setTodoCheck(todoEntity.isTodoCheck());
+
+                    // 업데이트된 TodoEntity 를 저장
+                    TodoEntity updatedTodo = todoRepository.save(existingTodo);
+                    return ResponseData.res(StatusCode.OK, Success.TRUE, updatedTodo);
+                } else {
+                    throw new NotFound("Todo not found for the given ID and member email", StatusCode.NOT_FOUND);
+                }
+            } else {
+                throw new BadRequest("Member not found for the given ID", StatusCode.BAD_REQUEST);
+            }
+        } catch (NotFound e) {
+            // NotFound 예외 처리
+            return ResponseData.res(e.getStatusCode(), Success.FALSE);
+        } catch (BadRequest e) {
+            // BadRequest 예외 처리
+            return ResponseData.res(e.getStatusCode(), Success.FALSE);
+        } catch (Exception e) {
+            // 기타 예외 처리
+            return ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE);
+        }
+    }
+
+
+
+
+
 
 
 }
