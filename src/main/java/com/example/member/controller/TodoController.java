@@ -1,12 +1,14 @@
 package com.example.member.controller;
 
 import com.example.member.dto.DeleteDTO;
+import com.example.member.dto.MemberDTO;
 import com.example.member.dto.TodoDTO;
 import com.example.member.dto.UpdateDTO;
 import com.example.member.entity.TodoEntity;
 import com.example.member.response.ResponseData;
 import com.example.member.response.StatusCode;
 import com.example.member.response.Success;
+import com.example.member.response.TodoResponse;
 import com.example.member.service.TodoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,16 +36,11 @@ public class TodoController {
         }
     }
 
-    @PostMapping(
-            path="/todo/mylist",
+    @GetMapping(
+            path="/todo/list",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ResponseData<List<TodoDTO>>> showmylist(@RequestBody TodoDTO todoDTO) {
-        try {
-            ResponseData<List<TodoDTO>> responseData = todoService.showlist(todoDTO);
-            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
-        }
+    public ResponseData<TodoResponse> list(@RequestBody MemberDTO memberDTO) {
+        return todoService.list(memberDTO);
     }
 
     @PostMapping("/todo/delete")
@@ -66,8 +63,8 @@ public class TodoController {
         }
     }
 
-    @PostMapping(
-            path = "/todo/allList",
+    @RequestMapping(
+            path = "/todo/alllist",
             produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }
     )
     public ResponseEntity<ResponseData<List<TodoDTO>>> getAllTodos() {
@@ -101,4 +98,3 @@ public class TodoController {
         }
     }
 }
-
