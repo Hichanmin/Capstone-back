@@ -1,6 +1,7 @@
 package com.example.member.mapper;
 
 import com.example.member.dto.ResponseMyTodoDTO;
+import com.example.member.dto.TodoCreateDTO;
 import com.example.member.dto.TodoDTO;
 import com.example.member.entity.TodoEntity;
 import org.mapstruct.Mapper;
@@ -14,4 +15,6 @@ public interface TodoMapper {
     TodoEntity toEntity(TodoDTO todoDTO);
     TodoDTO toDTO(TodoEntity todoEntity);
     ResponseMyTodoDTO toMyListDTO(TodoEntity todoEntity);
+
+    TodoEntity totoEntity(TodoCreateDTO todoCreateDTO);
 }

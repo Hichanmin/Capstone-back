@@ -1,9 +1,6 @@
 package com.example.member.controller;
 
-import com.example.member.dto.MemberDTO;
-import com.example.member.dto.DeleteDTO;
-import com.example.member.dto.TodoDTO;
-import com.example.member.dto.UpdateDTO;
+import com.example.member.dto.*;
 import com.example.member.entity.TodoEntity;
 import com.example.member.response.ResponseData;
 import com.example.member.response.StatusCode;
@@ -27,9 +24,9 @@ public class TodoController {
     @PostMapping(
             path = "/todo/create",
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ResponseData<TodoEntity>> save(@RequestBody TodoDTO todoDTO) {
+    public ResponseEntity<ResponseData<TodoEntity>> save(@RequestBody TodoCreateDTO todoCreateDTO) {
         try {
-            ResponseData<TodoEntity> responseData = todoService.save(todoDTO);
+            ResponseData<TodoEntity> responseData = todoService.save(todoCreateDTO);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));

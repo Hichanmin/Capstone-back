@@ -50,15 +50,21 @@ public class TodoService {
         }
     }
 
-    public ResponseData<TodoEntity> save(TodoDTO todoDTO) {
+    public ResponseData<TodoEntity> save(TodoCreateDTO todoCreateDTO) {
         try {
-            TodoEntity todoEntity = TodoMapper.INSTANCE.toEntity(todoDTO);
-            todoRepository.save(todoEntity);
-            return ResponseData.res(StatusCode.OK, Success.TRUE);
+            Optional<MemberEntity> memberEntity = memberRepository.findById(todoCreateDTO.getMemberId());
+            if (memberEntity.isPresent()) {
+                TodoEntity todoEntity = TodoMapper.INSTANCE.totoEntity(todoCreateDTO);
+                todoEntity.setTodoEmail(memberEntity.get().getMemberEmail());
+                todoRepository.save(todoEntity);
+                return ResponseData.res(StatusCode.OK, Success.TRUE);
+            }
+            return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
         } catch (Exception e) {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
         }
     }
+
 
     public List<ResponseMyTodoDTO> myTodoList(String memberEmail, String date) {
         Optional<List<TodoEntity>> optionalTodoEntityList = todoRepository.findByTodoDateAndTodoEmail(date, memberEmail);
