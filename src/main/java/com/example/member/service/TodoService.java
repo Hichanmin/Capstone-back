@@ -67,6 +67,12 @@ public class TodoService {
 
 
     public List<ResponseMyTodoDTO> myTodoList(String memberEmail, String date) {
+
+        CommentDTO comment1 = new CommentDTO(1L,"좋아요", 1L, "exam1@exam.com");
+        CommentDTO comment2 = new CommentDTO(2L,"별로에요", 2L, "exam2@exam.com");
+
+        List<CommentDTO> comments = Arrays.asList(comment1, comment2);
+
         Optional<List<TodoEntity>> optionalTodoEntityList = todoRepository.findByTodoDateAndTodoEmail(date, memberEmail);
         System.out.println("로그인중인 멤버 이메일 = " + memberEmail + "불러온 날짜" + date +
                 "로그인중인 멤버의 불러온 날짜에 맞는 투두들 = " + optionalTodoEntityList);
@@ -76,6 +82,7 @@ public class TodoService {
         if (optionalTodoEntityList.isPresent()) {
             for(TodoEntity todoEntity : optionalTodoEntityList.get()) {
                 ResponseMyTodoDTO myTodoDTO = TodoMapper.INSTANCE.toMyListDTO(todoEntity);
+                myTodoDTO.setComment(comments);
                 myTodoDTOList.add(myTodoDTO);
             }
         } else {
@@ -116,6 +123,8 @@ public class TodoService {
             List<TodoDTO> todoDTOList = filteredTodos.stream()
                     .map(TodoMapper.INSTANCE::toDTO)
                     .collect(Collectors.toList());
+
+
 
             return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
         } else {

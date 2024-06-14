@@ -8,19 +8,11 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class TodoResponse {
-    private List<ResponseMyTodoDTO> today = null;
-    private List<ResponseMyTodoDTO> tomorrow = null;
+    private List<ResponseMyTodoDTO> today;
+    private List<ResponseMyTodoDTO> tomorrow;
 
     public TodoResponse(List<ResponseMyTodoDTO> today, List<ResponseMyTodoDTO> tomorrow) {
-        if (today.isEmpty()) {
-            this.today = null;
-            this.tomorrow = tomorrow;
-        } else if (tomorrow.isEmpty()) {
-            this.today = today;
-            this.tomorrow = null;
-        } else {
-            this.today = today;
-            this.tomorrow = tomorrow;
-        }
+        this.today = today.isEmpty() ? null : today;
+        this.tomorrow = tomorrow.isEmpty() ? null : tomorrow;
     }
 }
