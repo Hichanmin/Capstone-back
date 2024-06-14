@@ -100,9 +100,9 @@ public class TodoService {
         }
         return myTodoDTOList;
     }
-    public ResponseData<TodoResponse> list(MemberDTO memberDTO) {
-        Optional<MemberEntity> memberEntity = memberRepository.findById(memberDTO.getId());
-        System.out.println("멤버 id 받아옴 : " + memberDTO.getId());
+    public ResponseData<TodoResponse> list(Long id) {
+        Optional<MemberEntity> memberEntity = memberRepository.findById(id);
+        System.out.println("멤버 id 받아옴 : " + id);
 
         if (memberEntity.isPresent()) {
             String memberEmail = memberEntity.get().getMemberEmail();

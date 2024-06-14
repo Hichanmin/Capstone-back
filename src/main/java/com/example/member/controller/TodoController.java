@@ -34,10 +34,9 @@ public class TodoController {
     }
 
     @GetMapping(
-            path="/todo/list",
-            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseData<TodoResponse> list(@RequestBody MemberDTO memberDTO) {
-        return todoService.list(memberDTO);
+            path="/todo/list")
+    public ResponseData<TodoResponse> list(@RequestHeader("Authorization") Long id) {
+        return todoService.list(id);
     }
 
     @PostMapping("/todo/delete")
