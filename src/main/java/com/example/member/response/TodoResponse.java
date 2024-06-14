@@ -12,7 +12,7 @@ public class TodoResponse {
     private List<ResponseMyTodoDTO> tomorrow;
 
     public TodoResponse(List<ResponseMyTodoDTO> today, List<ResponseMyTodoDTO> tomorrow) {
-        this.today = today.isEmpty() ? null : today;
-        this.tomorrow = tomorrow.isEmpty() ? null : tomorrow;
+        this.today = today;
+        this.tomorrow = tomorrow;
     }
 }

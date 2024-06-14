@@ -3,9 +3,12 @@ package com.example.member.service;
 import java.time.LocalDate;
 
 import com.example.member.dto.*;
+import com.example.member.entity.CommentEntity;
 import com.example.member.exception.BadRequest;
 import com.example.member.exception.NotFound;
+import com.example.member.mapper.CommentMapper;
 import com.example.member.mapper.UpdateMapper;
+import com.example.member.repository.CommentRepository;
 import com.example.member.repository.MemberRepository;
 import com.example.member.entity.MemberEntity;
 import com.example.member.entity.TodoEntity;
@@ -32,6 +35,7 @@ public class TodoService {
 
     private final MemberRepository memberRepository;
     private final TodoRepository todoRepository;
+    private final CommentRepository commentRepository;
 
     // 오늘 날짜와 내일 날짜 반환 yyyy-MM-dd format 으로 반환
     public DateDTO getDate() {
@@ -64,14 +68,20 @@ public class TodoService {
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
         }
     }
-
+    public List<CommentDTO> comments(Long id) {
+        Optional<List<CommentEntity>> optionalCommentEntityList = commentRepository.findByCommentTodoId(id);
+        List<CommentDTO> commentDTOList = new ArrayList<>();
+        if (optionalCommentEntityList.isPresent()) {
+            for(CommentEntity commentEntity : optionalCommentEntityList.get()) {
+                CommentDTO commentDTO = CommentMapper.INSTANCE.toDTO(commentEntity);
+                commentDTOList.add(commentDTO);
+            }
+            return commentDTOList;
+        }
+        return commentDTOList;
+    }
 
     public List<ResponseMyTodoDTO> myTodoList(String memberEmail, String date) {
-
-        CommentDTO comment1 = new CommentDTO(1L,"좋아요", 1L, "exam1@exam.com");
-        CommentDTO comment2 = new CommentDTO(2L,"별로에요", 2L, "exam2@exam.com");
-
-        List<CommentDTO> comments = Arrays.asList(comment1, comment2);
 
         Optional<List<TodoEntity>> optionalTodoEntityList = todoRepository.findByTodoDateAndTodoEmail(date, memberEmail);
         System.out.println("로그인중인 멤버 이메일 = " + memberEmail + "불러온 날짜" + date +
@@ -82,7 +92,7 @@ public class TodoService {
         if (optionalTodoEntityList.isPresent()) {
             for(TodoEntity todoEntity : optionalTodoEntityList.get()) {
                 ResponseMyTodoDTO myTodoDTO = TodoMapper.INSTANCE.toMyListDTO(todoEntity);
-                myTodoDTO.setComment(comments);
+                myTodoDTO.setComment(comments(myTodoDTO.getId()));
                 myTodoDTOList.add(myTodoDTO);
             }
         } else {
