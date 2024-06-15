@@ -4,11 +4,13 @@ import java.time.LocalDate;
 
 import com.example.member.dto.*;
 import com.example.member.entity.CommentEntity;
+import com.example.member.entity.LikeEntity;
 import com.example.member.exception.BadRequest;
 import com.example.member.exception.NotFound;
 import com.example.member.mapper.CommentMapper;
 import com.example.member.mapper.UpdateMapper;
 import com.example.member.repository.CommentRepository;
+import com.example.member.repository.LikeRepository;
 import com.example.member.repository.MemberRepository;
 import com.example.member.entity.MemberEntity;
 import com.example.member.entity.TodoEntity;
@@ -36,6 +38,7 @@ public class TodoService {
     private final MemberRepository memberRepository;
     private final TodoRepository todoRepository;
     private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
 
     // 오늘 날짜와 내일 날짜 반환 yyyy-MM-dd format 으로 반환
     public DateDTO getDate() {
@@ -121,25 +124,26 @@ public class TodoService {
         }
     }
 
-
-    public ResponseData<List<TodoDTO>> allList(boolean todoCheck) {
-        if (todoCheck) {
-            List<TodoEntity> allTodos = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-
-            List<TodoEntity> filteredTodos = allTodos.stream()
-                    .filter(TodoEntity::isTodoCheck)
-                    .toList();
-
-            List<TodoDTO> todoDTOList = filteredTodos.stream()
-                    .map(TodoMapper.INSTANCE::toDTO)
-                    .collect(Collectors.toList());
-
-
-
-            return ResponseData.res(StatusCode.OK, Success.TRUE, todoDTOList);
-        } else {
-            return ResponseData.res(StatusCode.OK, Success.TRUE, new ArrayList<>());
+    public ResponseData<List<AllTodoDTO>> allList(Long id) {
+        Optional<List<TodoEntity>> optionalTodoEntityList = todoRepository.findByTodoCheck(true);
+        if (optionalTodoEntityList.isPresent()) {
+            List<AllTodoDTO> allTodoDTOList = new ArrayList<>();
+            for (TodoEntity todoEntity : optionalTodoEntityList.get()) {
+                Optional<LikeEntity> optionalLikeEntity = likeRepository.findByLikeMemberIdAndLikeTodoId(id, todoEntity.getId());
+                if (optionalLikeEntity.isPresent()) {
+                    todoEntity.setTodoLikeCheck(true);
+                    AllTodoDTO allTodoDTO = TodoMapper.INSTANCE.toAllTodoDTO(todoEntity);
+                    allTodoDTO.setComment(comments(todoEntity.getId()));
+                    allTodoDTOList.add(allTodoDTO);
+                }
+                todoEntity.setTodoLikeCheck(false);
+                AllTodoDTO allTodoDTO = TodoMapper.INSTANCE.toAllTodoDTO(todoEntity);
+                allTodoDTO.setComment(comments(todoEntity.getId()));
+                allTodoDTOList.add(allTodoDTO);
+            }
+            return ResponseData.res(StatusCode.OK, Success.TRUE, allTodoDTOList);
         }
+        return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
     }
 
     public ResponseData<List<TodoDTO>> searchTitle(TodoDTO todoDTO) {

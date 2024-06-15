@@ -59,13 +59,10 @@ public class TodoController {
         }
     }
 
-    @PostMapping(
-            path = "/todo/allList",
-            produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }
-    )
-    public ResponseEntity<ResponseData<List<TodoDTO>>> getAllTodos() {
+    @GetMapping(path = "/todo/allList")
+    public ResponseEntity<ResponseData<List<AllTodoDTO>>> getAllTodos(@RequestHeader("Authorization") Long id) {
         try {
-            ResponseData<List<TodoDTO>> responseData = todoService.allList(true);
+            ResponseData<List<AllTodoDTO>> responseData = todoService.allList(id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
