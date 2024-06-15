@@ -10,8 +10,8 @@ import lombok.*;
 public class UpdateDTO {
     private Long todoId;
     private String todoTitle;
-    private String todoTime;
     private String todoContent;
     private String todoCategory;
     private boolean todoCheck;
+    private String todoTime;
 }

@@ -19,4 +19,5 @@ public class TodoDTO {
     private boolean todoCheck;
     private String todoEmail;
     private boolean todoLikeCheck;
+    private String todoTime;
 }

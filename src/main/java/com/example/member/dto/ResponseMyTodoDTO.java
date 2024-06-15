@@ -17,5 +17,6 @@ public class ResponseMyTodoDTO {
     private int todoLike;
     private String todoDate;
     private boolean todoCheck;
+    private String todoTime;
     private List<CommentDTO> comment;
 }

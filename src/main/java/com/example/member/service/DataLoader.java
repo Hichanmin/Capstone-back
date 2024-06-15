@@ -55,6 +55,7 @@ public class DataLoader implements CommandLineRunner {
             todo.setTodoDate("2024-06-15");
             todo.setTodoCategory("#Category1 #Category2 #Category3");
             todo.setTodoCheck(random.nextBoolean()); // 랜덤한 체크 여부
+            todo.setTodoTime("오후 3시 6분");
             todoRepository.save(todo);
 
             // 댓글 생성

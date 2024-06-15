@@ -18,5 +18,6 @@ public class AllTodoDTO {
     private String todoDate;
     private boolean todoCheck;
     private boolean todoLikeCheck;
+    private String todoTime;
     private List<CommentDTO> comment;
 }

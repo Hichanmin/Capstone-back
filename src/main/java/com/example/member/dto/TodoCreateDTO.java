@@ -14,6 +14,6 @@ public class TodoCreateDTO {
     private String todoContent;
     private String todoCategory;
     private String todoDate;
-    private String todoTime;
     private boolean todoCheck;
+    private String todoTime;
 }
