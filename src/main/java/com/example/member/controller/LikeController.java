@@ -21,7 +21,11 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping(
+<<<<<<< HEAD
             path = "",
+=======
+            path = "action",
+>>>>>>> origin/test
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
     public ResponseData<LikeEntity> like(@RequestBody LikeDTO likeDTO) {
         return likeService.like(likeDTO);

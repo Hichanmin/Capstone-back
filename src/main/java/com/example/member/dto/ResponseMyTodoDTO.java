@@ -1,7 +1,8 @@
 package com.example.member.dto;
 
-
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,4 +17,5 @@ public class ResponseMyTodoDTO {
     private int todoLike;
     private String todoDate;
     private boolean todoCheck;
+    private List<CommentDTO> comment;
 }

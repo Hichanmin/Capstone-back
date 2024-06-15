@@ -2,17 +2,21 @@ package com.example.member.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UpdateDTO {
-    private Long memberId;
-    private Long todoId;
+public class AllTodoDTO {
+    private Long id;
     private String todoTitle;
-    private String todoTime;
     private String todoContent;
     private String todoCategory;
+    private int todoLike;
+    private String todoDate;
     private boolean todoCheck;
+    private boolean todoLikeCheck;
+    private List<CommentDTO> comment;
 }
