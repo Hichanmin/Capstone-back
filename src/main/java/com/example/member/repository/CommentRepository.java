@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
-    List<CommentEntity> findByCommentTodoId(Long commentTodoId);
+    Optional<List<CommentEntity>> findByCommentTodoId(Long commentTodoId);
     Optional<CommentEntity> findByCommentId(Long commentId);
 }

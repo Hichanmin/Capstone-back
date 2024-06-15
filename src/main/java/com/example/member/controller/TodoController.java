@@ -1,12 +1,11 @@
 package com.example.member.controller;
 
-import com.example.member.dto.DeleteDTO;
-import com.example.member.dto.TodoDTO;
-import com.example.member.dto.UpdateDTO;
+import com.example.member.dto.*;
 import com.example.member.entity.TodoEntity;
 import com.example.member.response.ResponseData;
 import com.example.member.response.StatusCode;
 import com.example.member.response.Success;
+import com.example.member.response.TodoResponse;
 import com.example.member.service.TodoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,34 +21,28 @@ public class TodoController {
 
     private final TodoService todoService;
 
-    @PostMapping(
-            path = "/todo/create",
-            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ResponseData<TodoEntity>> save(@RequestBody TodoDTO todoDTO) {
+    @PostMapping("/todo/create")
+    public ResponseEntity<ResponseData<TodoEntity>> save(@RequestBody TodoCreateDTO todoCreateDTO, @RequestHeader("X-Member-Id") Long memberId) {
         try {
-            ResponseData<TodoEntity> responseData = todoService.save(todoDTO);
+            ResponseData<TodoEntity> responseData = todoService.save(todoCreateDTO, memberId);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
         }
     }
 
-    @PostMapping(
-            path="/todo/mylist",
-            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ResponseData<List<TodoDTO>>> showmylist(@RequestBody TodoDTO todoDTO) {
-        try {
-            ResponseData<List<TodoDTO>> responseData = todoService.showlist(todoDTO);
-            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
-        }
+
+
+    @GetMapping(
+            path="/todo/list")
+    public ResponseData<TodoResponse> list(@RequestHeader("X-Member-Id") Long id) {
+        return todoService.list(id);
     }
 
     @PostMapping("/todo/delete")
-    public ResponseEntity<ResponseData<?>> delete(@RequestBody DeleteDTO deleteDTO) {
+    public ResponseEntity<ResponseData<?>> delete(@RequestBody DeleteDTO deleteDTO, @RequestHeader("X-Member-Id") Long id) {
         try {
-            ResponseData<?> responseData = todoService.delete(deleteDTO);
+            ResponseData<?> responseData = todoService.delete(deleteDTO, id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
@@ -57,48 +50,51 @@ public class TodoController {
     }
 
     @PostMapping("/todo/update")
-    public ResponseEntity<ResponseData<TodoEntity>> update(@RequestBody UpdateDTO updateDTO) {
+    public ResponseEntity<ResponseData<TodoEntity>> update(@RequestBody UpdateDTO updateDTO, @RequestHeader("X-Member-Id") Long id) {
         try {
-            ResponseData<TodoEntity> responseData = todoService.update(updateDTO);
+            ResponseData<TodoEntity> responseData = todoService.update(updateDTO,id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
         }
     }
 
-    @PostMapping(
-            path = "/todo/allList",
-            produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }
-    )
-    public ResponseEntity<ResponseData<List<TodoDTO>>> getAllTodos() {
+    @GetMapping(path = "/todo/allList")
+    public ResponseEntity<ResponseData<List<AllTodoDTO>>> getAllTodos(@RequestHeader("X-Member-Id") Long id) {
         try {
-            ResponseData<List<TodoDTO>> responseData = todoService.allList(true);
+            ResponseData<List<AllTodoDTO>> responseData = todoService.allList(id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
         }
     }
 
-    @PostMapping(
-            path="/todo/searchTitle",
-            consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ResponseData<List<TodoDTO>>> searchTitle(@RequestBody TodoDTO TodoDTO) {
+    @GetMapping("/todo/searchTitle")
+    public ResponseEntity<ResponseData<List<AllTodoDTO>>> searchTitle(@RequestParam String todoTitle, @RequestHeader("X-Member-Id") Long id) {
         try {
-            ResponseData<List<TodoDTO>> responseData = todoService.searchTitle(TodoDTO);
+            TodoDTO todoDTO = new TodoDTO();
+            todoDTO.setTodoTitle(todoTitle);
+
+            ResponseData<List<AllTodoDTO>> responseData = todoService.searchTitle(todoDTO, id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
         }
     }
 
-    @PostMapping("/todo/searchCategory")
-    public ResponseEntity<ResponseData<List<TodoDTO>>> searchCategory(@RequestBody TodoDTO todoDTO) {
+
+    @GetMapping("/todo/searchCategory")
+    public ResponseEntity<ResponseData<List<AllTodoDTO>>> searchCategory(@RequestParam String todoCategory ,@RequestHeader("X-Member-Id") Long id) {
         try {
-            ResponseData<List<TodoDTO>> responseData = todoService.searchCategory(todoDTO);
+            TodoDTO todoDTO = new TodoDTO();
+            todoDTO.setTodoCategory(todoCategory);
+
+            ResponseData<List<AllTodoDTO>> responseData = todoService.searchCategory(todoDTO, id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
         }
     }
+
 }
 
