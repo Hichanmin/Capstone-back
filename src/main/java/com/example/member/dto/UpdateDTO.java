@@ -8,7 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class UpdateDTO {
-    private Long memberId;
     private Long todoId;
     private String todoTitle;
     private String todoTime;
