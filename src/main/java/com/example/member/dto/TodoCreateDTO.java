@@ -16,5 +16,4 @@ public class TodoCreateDTO {
     private String todoDate;
     private String todoTime;
     private boolean todoCheck;
-    private Long memberId;
 }

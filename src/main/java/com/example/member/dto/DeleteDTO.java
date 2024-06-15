@@ -9,6 +9,5 @@ import lombok.*;
 @ToString
 
 public class DeleteDTO {
-    private Long memberId;
     private Long todoId;
 }
