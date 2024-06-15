@@ -8,6 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 
-public class DeleteDTO {
-    private Long todoId;
+public class LikeDTO {
+    private Long id;
+    private Long likeMemberId;
+    private Long likeTodoId;
 }

@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 
-public class DeleteDTO {
-    private Long todoId;
+public class DateDTO {
+    private String today;
+    private String tomorrow;
 }
