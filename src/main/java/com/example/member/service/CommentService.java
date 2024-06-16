@@ -49,7 +49,7 @@ public class CommentService {
             newComment.setCommentMemberEmail(memberEmail); // String 타입으로 저장
             commentRepository.save(newComment);
 
-            return ResponseData.res(StatusCode.OK, Success.TRUE, "Comment added successfully");
+            return ResponseData.res(StatusCode.OK, Success.TRUE, memberEmail);
         } else {
             // 투두가 존재하지 않으면 적절한 응답 반환
             return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE, "Todo not found");
