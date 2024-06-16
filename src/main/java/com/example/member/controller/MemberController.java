@@ -40,14 +40,14 @@ public class MemberController {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
 //        }
 //    }
-//    public ResponseEntity<ResponseData<MemberEntity>> save(@RequestBody MemberDTO memberDTO) {
-//        try {
-//            ResponseData<MemberEntity> responseData = memberService.save(memberDTO);
-//            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
-//        }
-//    }
+    public ResponseEntity<ResponseData<MemberEntity>> save(@RequestBody MemberDTO memberDTO) {
+        try {
+            ResponseData<MemberEntity> responseData = memberService.save(memberDTO);
+            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+        }
+    }
 
     @PostMapping(
             path = "/login",

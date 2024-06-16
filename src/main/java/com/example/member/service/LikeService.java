@@ -20,8 +20,9 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final TodoRepository todoRepository;
 
-    public ResponseData<LikeEntity> like(LikeDTO likeDTO) {
-        Optional<LikeEntity> likeInfo = likeRepository.findByLikeMemberIdAndLikeTodoId(likeDTO.getLikeMemberId(), likeDTO.getLikeTodoId());
+    public ResponseData<LikeEntity> like(LikeDTO likeDTO, Long id) {
+        likeDTO.setLikeMemberId(id);
+        Optional<LikeEntity> likeInfo = likeRepository.findByLikeMemberIdAndLikeTodoId(id, likeDTO.getLikeTodoId());
         Optional<TodoEntity> optionalTodoEntity = todoRepository.findById(likeDTO.getLikeTodoId());
         if (likeInfo.isEmpty()) {
             LikeEntity likeEntity = LikeMapper.INSTANCE.toEntity(likeDTO);
