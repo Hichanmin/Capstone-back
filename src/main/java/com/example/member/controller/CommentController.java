@@ -19,9 +19,9 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping(path = "/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseData<String>> addComment(@RequestBody CommentDTO commentDTO) {
+    public ResponseEntity<ResponseData<String>> addComment(@RequestBody CommentDTO commentDTO, @RequestHeader("X-Member-Id") Long id) {
         try {
-            ResponseData<String> responseData = commentService.addComment(commentDTO);
+            ResponseData<String> responseData = commentService.addComment(commentDTO, id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));

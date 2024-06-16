@@ -15,6 +15,7 @@ public class AllTodoDTO {
     private String todoContent;
     private String todoCategory;
     private int todoLike;
+    private String todoEmail;
     private String todoDate;
     private boolean todoCheck;
     private boolean todoLikeCheck;

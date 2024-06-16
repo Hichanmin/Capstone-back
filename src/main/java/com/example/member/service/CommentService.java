@@ -2,6 +2,8 @@ package com.example.member.service;
 
 import java.util.Optional;
 
+import com.example.member.entity.MemberEntity;
+import com.example.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +21,22 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final TodoRepository todoRepository;
+    private final MemberRepository memberRepository;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository, TodoRepository todoRepository) {
+    public CommentService(CommentRepository commentRepository, TodoRepository todoRepository, MemberRepository memberRepository) {
         this.commentRepository = commentRepository;
         this.todoRepository = todoRepository;
+        this.memberRepository = memberRepository;
     }
 
-    public ResponseData<String> addComment(CommentDTO commentDTO) {
+    public ResponseData<String> addComment(CommentDTO commentDTO, Long id) {
         // CommentDTO에서 필요한 정보 추출
         String commentText = commentDTO.getComment();
-        String memberEmail = commentDTO.getCommentMemberEmail(); // String 타입으로 유지
+        Optional<MemberEntity> optionalMemberEntity = memberRepository.findById(id);
+
+        String memberEmail = optionalMemberEntity.get().getMemberEmail();
+
         Long todoId = commentDTO.getCommentTodoId();
 
         // 요청한 투두 아이디가 존재하는지 확인
