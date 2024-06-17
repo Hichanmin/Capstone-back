@@ -59,13 +59,10 @@ public class TodoController {
         }
     }
 
-    @GetMapping(
-            path = "/todo/allList",
-            produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE }
-    )
-    public ResponseEntity<ResponseData<List<ResponseMyTodoDTO>>> getAllTodos() {
+    @GetMapping(path = "/todo/allList")
+    public ResponseEntity<ResponseData<List<AllTodoDTO>>> getAllTodos(@RequestHeader("X-Member-Id") Long id) {
         try {
-            ResponseData<List<ResponseMyTodoDTO>> responseData = todoService.allList(true);
+            ResponseData<List<AllTodoDTO>> responseData = todoService.allList(id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
@@ -73,12 +70,12 @@ public class TodoController {
     }
 
     @GetMapping("/todo/searchTitle")
-    public ResponseEntity<ResponseData<List<ResponseMyTodoDTO>>> searchTitle(@RequestParam String todoTitle) {
+    public ResponseEntity<ResponseData<List<AllTodoDTO>>> searchTitle(@RequestParam String todoTitle, @RequestHeader("X-Member-Id") Long id) {
         try {
             TodoDTO todoDTO = new TodoDTO();
             todoDTO.setTodoTitle(todoTitle);
 
-            ResponseData<List<ResponseMyTodoDTO>> responseData = todoService.searchTitle(todoDTO);
+            ResponseData<List<AllTodoDTO>> responseData = todoService.searchTitle(todoDTO, id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
@@ -87,12 +84,12 @@ public class TodoController {
 
 
     @GetMapping("/todo/searchCategory")
-    public ResponseEntity<ResponseData<List<ResponseMyTodoDTO>>> searchCategory(@RequestParam String todoCategory) {
+    public ResponseEntity<ResponseData<List<AllTodoDTO>>> searchCategory(@RequestParam String todoCategory ,@RequestHeader("X-Member-Id") Long id) {
         try {
             TodoDTO todoDTO = new TodoDTO();
             todoDTO.setTodoCategory(todoCategory);
 
-            ResponseData<List<ResponseMyTodoDTO>> responseData = todoService.searchCategory(todoDTO);
+            ResponseData<List<AllTodoDTO>> responseData = todoService.searchCategory(todoDTO, id);
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));

@@ -9,14 +9,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ResponseMyTodoDTO {
+public class AllTodoDTO {
     private Long id;
+    private String todoEmail;
     private String todoTitle;
     private String todoContent;
     private String todoCategory;
     private int todoLike;
     private String todoDate;
     private boolean todoCheck;
+    private boolean todoLikeCheck;
     private String todoTime;
     private List<CommentDTO> comment;
 }

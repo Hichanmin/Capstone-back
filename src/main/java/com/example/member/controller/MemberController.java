@@ -30,15 +30,24 @@ public class MemberController {
 
     @PostMapping(
             path = "/save",
-            consumes = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<ResponseData<MemberEntity>> save(@RequestBody MemberDTO memberDTO) {
+            consumes = {MediaType.APPLICATION_JSON_VALUE})
+     public ResponseEntity<ResponseData<MemberEntity>> save(@RequestBody MemberDTO memberDTO) {
         try {
             ResponseData<MemberEntity> responseData = memberService.save(memberDTO);
+            // logger.info("memberController "String.valueOf(memberDTO)); 회원가입 프론트에서 받아온 값
             return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
         }
     }
+//    public ResponseEntity<ResponseData<MemberEntity>> save(@RequestBody MemberDTO memberDTO) {
+//        try {
+//            ResponseData<MemberEntity> responseData = memberService.save(memberDTO);
+//            return ResponseEntity.status(responseData.getStatusCode()).body(responseData);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE));
+//        }
+//    }
 
     @PostMapping(
             path = "/login",

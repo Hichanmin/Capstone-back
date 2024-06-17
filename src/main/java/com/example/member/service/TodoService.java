@@ -4,11 +4,13 @@ import java.time.LocalDate;
 
 import com.example.member.dto.*;
 import com.example.member.entity.CommentEntity;
+import com.example.member.entity.LikeEntity;
 import com.example.member.exception.BadRequest;
 import com.example.member.exception.NotFound;
 import com.example.member.mapper.CommentMapper;
 import com.example.member.mapper.UpdateMapper;
 import com.example.member.repository.CommentRepository;
+import com.example.member.repository.LikeRepository;
 import com.example.member.repository.MemberRepository;
 import com.example.member.entity.MemberEntity;
 import com.example.member.entity.TodoEntity;
@@ -36,6 +38,7 @@ public class TodoService {
     private final MemberRepository memberRepository;
     private final TodoRepository todoRepository;
     private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
 
     // 오늘 날짜와 내일 날짜 반환 yyyy-MM-dd format 으로 반환
     public DateDTO getDate() {
@@ -122,65 +125,44 @@ public class TodoService {
     }
 
 
-    public ResponseData<List<ResponseMyTodoDTO>> allList(boolean todoCheck) {
+    public ResponseData<List<AllTodoDTO>> allList(Long id) {
         List<TodoEntity> allTodos = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "todoLike"));
+        List<AllTodoDTO> allTodoDTOList = createAllTodoDTOs(allTodos, id);
+        return ResponseData.res(StatusCode.OK, Success.TRUE, allTodoDTOList);
+    }
 
-        List<ResponseMyTodoDTO> allTodoDTOs = new ArrayList<>();
-        for (TodoEntity todoEntity : allTodos) {
-            if (todoEntity.isTodoCheck() == todoCheck) {  // todoCheck가 true인 경우만 추가
-                ResponseMyTodoDTO allTodoDTO = TodoMapper.INSTANCE.toMyListDTO(todoEntity);
-                allTodoDTO.setComment(comments(allTodoDTO.getId()));
-                allTodoDTOs.add(allTodoDTO);
+    private List<AllTodoDTO> createAllTodoDTOs(List<TodoEntity> todoEntities, Long memberId) {
+        List<AllTodoDTO> allTodoDTOList = new ArrayList<>();
+        for (TodoEntity todoEntity : todoEntities) {
+            Optional<LikeEntity> optionalLikeEntity = likeRepository.findByLikeMemberIdAndLikeTodoId(memberId, todoEntity.getId());
+            boolean todoLikeCheck = optionalLikeEntity.isPresent();
 
-                return ResponseData.res(StatusCode.OK, Success.TRUE, allTodoDTOs);
-            } else {
-                return ResponseData.res(StatusCode.BAD_REQUEST, Success.FALSE);
+            if(todoEntity.isTodoCheck()){
+                AllTodoDTO allTodoDTO = TodoMapper.INSTANCE.toAllTodoDTO(todoEntity);
+                allTodoDTO.setComment(comments(todoEntity.getId()));
+                allTodoDTO.setTodoLikeCheck(todoLikeCheck);
+
+                allTodoDTOList.add(allTodoDTO);
             }
         }
-        return ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE);
+        return allTodoDTOList;
     }
 
 
-    public ResponseData<List<ResponseMyTodoDTO>> searchTitle(TodoDTO todoDTO) {
+    public ResponseData<List<AllTodoDTO>> searchTitle(TodoDTO todoDTO, Long id) {
         String todoTitle = todoDTO.getTodoTitle();
-        List<TodoEntity> todoEntities = todoRepository.findByTodoTitleContaining(todoTitle).orElse(Collections.emptyList());
+        List<TodoEntity> TitleTodoDTO = todoRepository.findByTodoTitleContaining(todoTitle).orElse((Collections.emptyList()));
+        List<AllTodoDTO> TitleTodoDTOList = createAllTodoDTOs(TitleTodoDTO, id);
 
-        List<ResponseMyTodoDTO> TitleTodo = todoEntities.stream()
-                .filter(TodoEntity::isTodoCheck)
-                .map(todoEntity -> {
-                    ResponseMyTodoDTO TitleTodoDTO = TodoMapper.INSTANCE.toMyListDTO(todoEntity);
-                    TitleTodoDTO.setComment(comments(TitleTodoDTO.getId()));
-                    return TitleTodoDTO;
-                })
-                .collect(Collectors.toList());
-
-        return TitleTodo.isEmpty()
-                ? ResponseData.res(StatusCode.NOT_FOUND, Success.FALSE)
-                : ResponseData.res(StatusCode.OK, Success.TRUE, TitleTodo);
+        return ResponseData.res(StatusCode.OK, Success.TRUE, TitleTodoDTOList);
     }
 
-
-
-
-
-
-
-    public ResponseData<List<ResponseMyTodoDTO>> searchCategory(TodoDTO todoDTO) {
+    public ResponseData<List<AllTodoDTO>> searchCategory(TodoDTO todoDTO, Long id) {
         String todoCategory = todoDTO.getTodoCategory();
-        List<TodoEntity> todoEntities = todoRepository.findByTodoCategoryContaining(todoCategory).orElse(Collections.emptyList());
+        List<TodoEntity> CategoryTodoDTO = todoRepository.findByTodoCategoryContaining(todoCategory).orElse(Collections.emptyList());
+        List<AllTodoDTO> CategoryTodoDTOList = createAllTodoDTOs(CategoryTodoDTO, id);
 
-        List<ResponseMyTodoDTO> CategoryTodo = todoEntities.stream()
-                .filter(TodoEntity::isTodoCheck)
-                .map(todoEntity -> {
-                    ResponseMyTodoDTO TitleTodoDTO = TodoMapper.INSTANCE.toMyListDTO(todoEntity);
-                    TitleTodoDTO.setComment(comments(TitleTodoDTO.getId()));
-                    return TitleTodoDTO;
-                })
-                .collect(Collectors.toList());
-
-        return CategoryTodo.isEmpty()
-                ? ResponseData.res(StatusCode.NOT_FOUND, Success.FALSE)
-                : ResponseData.res(StatusCode.OK, Success.TRUE, CategoryTodo);
+        return ResponseData.res(StatusCode.OK, Success.TRUE, CategoryTodoDTOList);
     }
 
 
@@ -227,6 +209,7 @@ public class TodoService {
                     existingTodo.setTodoContent(todoEntity.getTodoContent());
                     existingTodo.setTodoCategory(todoEntity.getTodoCategory());
                     existingTodo.setTodoCheck(todoEntity.isTodoCheck());
+                    existingTodo.setTodoTime(todoEntity.getTodoTime());
 
                     // 업데이트된 TodoEntity 를 저장
                     TodoEntity updatedTodo = todoRepository.save(existingTodo);
@@ -248,11 +231,5 @@ public class TodoService {
             return ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE);
         }
     }
-
-
-
-
-
-
 
 }
