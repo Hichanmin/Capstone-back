@@ -11,6 +11,7 @@ import java.util.List;
 @ToString
 public class AllTodoDTO {
     private Long id;
+    private String todoEmail;
     private String todoTitle;
     private String todoContent;
     private String todoCategory;

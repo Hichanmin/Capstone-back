@@ -138,19 +138,15 @@ public class TodoService {
             boolean todoLikeCheck = optionalLikeEntity.isPresent();
 
             if(todoEntity.isTodoCheck()){
-            AllTodoDTO allTodoDTO = TodoMapper.INSTANCE.toAllTodoDTO(todoEntity);
-            allTodoDTO.setComment(comments(todoEntity.getId()));
-            allTodoDTO.setTodoLikeCheck(todoLikeCheck);
+                AllTodoDTO allTodoDTO = TodoMapper.INSTANCE.toAllTodoDTO(todoEntity);
+                allTodoDTO.setComment(comments(todoEntity.getId()));
+                allTodoDTO.setTodoLikeCheck(todoLikeCheck);
 
-            allTodoDTOList.add(allTodoDTO);
+                allTodoDTOList.add(allTodoDTO);
             }
         }
         return allTodoDTOList;
     }
-
-
-
-
 
 
     public ResponseData<List<AllTodoDTO>> searchTitle(TodoDTO todoDTO, Long id) {
@@ -213,6 +209,7 @@ public class TodoService {
                     existingTodo.setTodoContent(todoEntity.getTodoContent());
                     existingTodo.setTodoCategory(todoEntity.getTodoCategory());
                     existingTodo.setTodoCheck(todoEntity.isTodoCheck());
+                    existingTodo.setTodoTime(todoEntity.getTodoTime());
 
                     // 업데이트된 TodoEntity 를 저장
                     TodoEntity updatedTodo = todoRepository.save(existingTodo);
@@ -234,11 +231,5 @@ public class TodoService {
             return ResponseData.res(StatusCode.INTERNAL_SERVER_ERROR, Success.FALSE);
         }
     }
-
-
-
-
-
-
 
 }
