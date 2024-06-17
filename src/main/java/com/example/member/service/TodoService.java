@@ -213,6 +213,7 @@ public class TodoService {
                     existingTodo.setTodoContent(todoEntity.getTodoContent());
                     existingTodo.setTodoCategory(todoEntity.getTodoCategory());
                     existingTodo.setTodoCheck(todoEntity.isTodoCheck());
+                    existingTodo.setTodoTime(todoEntity.getTodoTime());
 
                     // 업데이트된 TodoEntity 를 저장
                     TodoEntity updatedTodo = todoRepository.save(existingTodo);
